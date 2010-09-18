@@ -1,0 +1,12 @@
+An interactive DBIC tutorial.
+------------------------------------
+
+The idea is that the user takes part by interactively coding parts of the solution, building on their code as they progress through the tutorial.
+
+Each user therefore needs an own copy of the code/environment.
+
+We need to be able to test / build the user's code safely on the host (chroot).
+
+We need oto have a set of pre-defined tests that the code is run against to show the user how they are progressing.
+
+See todo.org for a set of Tasks, in Emacs org-mode format.
