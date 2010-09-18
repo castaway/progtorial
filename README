@@ -7,6 +7,6 @@ Each user therefore needs an own copy of the code/environment.
 
 We need to be able to test / build the user's code safely on the host (chroot).
 
-We need oto have a set of pre-defined tests that the code is run against to show the user how they are progressing.
+We need to have a set of pre-defined tests that the code is run against to show the user how they are progressing.
 
 See todo.org for a set of Tasks, in Emacs org-mode format.
