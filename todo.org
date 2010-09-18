@@ -2,11 +2,16 @@
 ** TODO Path to user environment .. username/XX?
 ** TODO User Auth, OpenID?
 ** TODO Tutorial content
+** TODO layout of "system"
+** TODO Docs in module code, do we set AUTHOR / etc for the user?
+ 
 *** TODO Ch1 - setup of dbic schema files
 * Setup
 ** TODO Install perlbrew'd 5.10.1 / 5.12.x in a clean location
+   CLOCK: [2010-09-18 Sat 15:02]--[2010-09-18 Sat 15:08] =>  0:06
 ** TODO Install DBIx::Class and deps in the perlbrew
 ** TODO Create bare skeleton of dbic tutorial (makefile, basic schema)
+   CLOCK: [2010-09-18 Sat 15:09]--[2010-09-18 Sat 16:34] =>  1:25
 * Coding
 ** TODO "Clone" new user environment
 *** TODO Hardlink the perlbrew and dep modules (by path so user of progtorial can supply their own)
