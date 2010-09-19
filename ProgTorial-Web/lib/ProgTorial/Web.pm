@@ -15,6 +15,11 @@ use Catalyst::Runtime 5.80;
 use Catalyst qw/
     -Debug
     ConfigLoader
+    +CatalystX::SimpleLogin
+    Authentication
+    Session
+    Session::Store::File
+    Session::State::Cookie
     Static::Simple
 /;
 
@@ -34,6 +39,23 @@ $VERSION = eval $VERSION;
 
 __PACKAGE__->config(
     name => 'ProgTorial::Web',
+    ## should be in conf file.
+    'Controller::Chapter' => {
+        pages_path => ProgTorial::Web->path_to('pages'),
+    },
+    'Plugin::Authentication' => {
+        default => {
+            credential => {
+                class => 'OpenID',
+                ua_class => 'LWP::UserAgent',
+            },
+            store => {
+                class => 'DBIx::Class',
+                user_model => 'DataBase::User',
+                 use_userdata_from_session => 0,
+            }
+        }
+    },
     # Disable deprecated behavior needed by old applications
     disable_component_resolution_regex_fallback => 1,
 );

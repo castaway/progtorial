@@ -2,7 +2,12 @@
 ** TODO Path to user environment .. username/XX?
 ** TODO User Auth, OpenID?
 ** TODO Tutorial content
-** TODO layout of "system"
+** TODO layout of "system" skeletons/ = tarballs & content for base tutorial
+ exercises/ = subdir per chapter? containing tests/ dir, lib/ containing full
+ solution needed up until this chapter to solve
+ the current test, minus whatever the test is testing. overlay this onto the user's lib dir
+ if requested, or they haven't done previous codings.
+** TODO How to keep track which items the user has done?
 ** TODO Docs in module code, do we set AUTHOR / etc for the user?
  
 *** TODO Ch1 - setup of dbic schema files
@@ -10,21 +15,27 @@
 ** TODO Install perlbrew'd 5.10.1 / 5.12.x in a clean location
    CLOCK: [2010-09-18 Sat 15:02]--[2010-09-18 Sat 15:08] =>  0:06
 ** TODO Install DBIx::Class and deps in the perlbrew
-** TODO Create bare skeleton of dbic tutorial (makefile, basic schema)
+** DONE Create bare skeleton of dbic tutorial (makefile, basic schema)
    CLOCK: [2010-09-18 Sat 15:09]--[2010-09-18 Sat 16:34] =>  1:25
 * Coding
 ** TODO "Clone" new user environment
 *** TODO Hardlink the perlbrew and dep modules (by path so user of progtorial can supply their own)
 *** TODO Copy / unpack the bare skeleton into user env
 ** TODO Setup webframework to build the dbic tutorial application in
-*** TODO Install catalyst (in its own perlbrew/locallib?)
-*** TODO Set up authentication (SimpleAuth?)
+*** DONE Install catalyst (in its own perlbrew/locallib?)
+    CLOCK: [2010-09-18 Sat 17:43]--[2010-09-18 Sat 19:09] =>  1:26
+*** TODO Set up authentication (CatalystX::Login?)
+    CLOCK: [2010-09-18 Sat 21:06]--[2010-09-18 Sat 23:00] =>  1:54
 ** TODO Compiling / testing user code
 *** TODO Figure out how to run all these chrooted
 *** TODO Compile user code, report results
 *** TODO Run user code against applicable test suite / file, report results
 *** TODO Output test cover results to somewhere the application can display them
 * Front-end
+** DONE Setup single chapter page (Markdown / TT)
+   CLOCK: [2010-09-19 Sun 19:14]--[2010-09-19 Sun 20:05] =>  0:51
+   CLOCK: [2010-09-19 Sun 17:31]--[2010-09-19 Sun 17:53] =>  0:22
+   CLOCK: [2010-09-19 Sun 16:42]--[2010-09-19 Sun 17:09] =>  0:27
 ** TODO Setup tutorial pages layout, use html links to start/next/previous/contents etc
 ** TODO Setup minimal navigation  (to all pages from any)
 ** TODO Create initial tutorial page to add interactivity to

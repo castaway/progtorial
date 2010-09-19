@@ -14,7 +14,7 @@ sub make_chroot_env {
 
   $dest_dir->mkpath;
 
-  my @todo = ('/usr/bin/perl',
+  my @todo = (which('perl'),
               '/bin/bash',
               '/bin/sh',
               '/usr/bin/make',
@@ -23,7 +23,7 @@ sub make_chroot_env {
               '/usr/bin/strace',
               '/usr/lib/locale/locale-archive',
               # '/usr/share/locale/en_US.utf8',
-              '/usr/share/locale/en_US',
+#              '/usr/share/locale/en_US',
               # '/usr/share/locale/en.utf8',
               '/usr/share/locale/en',
               pm_file('Config')->parent->file('Config_heavy.pl'),
