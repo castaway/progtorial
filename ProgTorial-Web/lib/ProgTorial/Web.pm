@@ -39,22 +39,44 @@ $VERSION = eval $VERSION;
 
 __PACKAGE__->config(
     name => 'ProgTorial::Web',
+    'View::HTML' => {
+        STRICT => 1
+    },
     ## should be in conf file.
     'Controller::Chapter' => {
         pages_path => ProgTorial::Web->path_to('pages'),
     },
+#    'Controller::User' => { traits => 'Login::OpenID' },
+    'Controller::Login' => {
+#        traits => ['OpenID'],
+#        login_form_class_roles => [ 'CatalystX::SimpleLogin::Form::LoginOpenID'],
+    },
     'Plugin::Authentication' => {
-        default => {
-            credential => {
-                class => 'OpenID',
-                ua_class => 'LWP::UserAgent',
+        default_realm => 'default',
+        realms => { 
+            default => {
+                credential => {
+                    class => 'OpenID',
+                    ua_class => 'LWP::UserAgent',
+                },
+                store => {
+                    class => 'DBIx::Class',
+                    user_model => 'DataBase::User',
+                    use_userdata_from_session => 0,
+                },
             },
-            store => {
-                class => 'DBIx::Class',
-                user_model => 'DataBase::User',
-                 use_userdata_from_session => 0,
-            }
-        }
+            openid => {
+                credential => {
+                    class => 'OpenID',
+                    ua_class => 'LWP::UserAgent',
+                },
+                store => {
+                    class => 'DBIx::Class',
+                    user_model => 'DataBase::User',
+                    use_userdata_from_session => 0,
+                },
+            },
+        },
     },
     # Disable deprecated behavior needed by old applications
     disable_component_resolution_regex_fallback => 1,

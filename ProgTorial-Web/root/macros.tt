@@ -1,0 +1,9 @@
+[% MACRO include_exercise(ex) BLOCK %]
+  [% IF c.user_exists %]
+    'foo'
+    [% load_exercise(ex) %]
+  [% ELSE %]
+    'bar'
+    [% login_invite(ex) %]
+  [% END %]
+[% END %]

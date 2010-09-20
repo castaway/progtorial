@@ -36,6 +36,8 @@
    CLOCK: [2010-09-19 Sun 19:14]--[2010-09-19 Sun 20:05] =>  0:51
    CLOCK: [2010-09-19 Sun 17:31]--[2010-09-19 Sun 17:53] =>  0:22
    CLOCK: [2010-09-19 Sun 16:42]--[2010-09-19 Sun 17:09] =>  0:27
+** TODO Make chapter page interactive if user logged in
+   CLOCK: [2010-09-20 Mon 08:35]--[2010-09-20 Mon 09:05] =>  0:30
 ** TODO Setup tutorial pages layout, use html links to start/next/previous/contents etc
 ** TODO Setup minimal navigation  (to all pages from any)
 ** TODO Create initial tutorial page to add interactivity to

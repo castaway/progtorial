@@ -10,8 +10,6 @@ BEGIN { extends 'Catalyst::Controller' }
 #
 __PACKAGE__->config(
     namespace => '',
-    'Controller::User' => { traits => 'Login::OpenID' },
-    'Controller::Login' => { traits => 'Login::OpenID' }
 );
 
 =head1 NAME

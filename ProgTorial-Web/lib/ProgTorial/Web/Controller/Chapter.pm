@@ -38,6 +38,9 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
     } else {
         return $c->res->redirect($c->uri_for('/'));
     }
+
+    $c->stash(load_exercise => sub { my $exercise = shift; return $exercise });
+    $c->stash(login_invite => sub { my $exercise = shift; return "You should login to solve $exercise" });
 }
 
 sub chapter_index :Chained('chapter') :PathPart('') :Args(0) {

@@ -371,8 +371,6 @@ The posts table looks like this in mysql:
     CONSTRAINT posts_fk_user_id FOREIGN KEY (user_id) REFERENCES users (id)
   );
 
-Create the Result class for it.
-
 You will need another type of relationship for this class,
 `belongs_to`. Use it like this:
 
@@ -387,6 +385,10 @@ before.
 
 The third argument is the column in the current class that contains
 the primary key of the related class.
+
+Create the Result class for it.
+
+[% include_exercise('create_post_class') %]
 
 ### More result classes
 

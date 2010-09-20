@@ -1,11 +1,21 @@
+[% MACRO include_exercise(ex) BLOCK %]
+  [% IF c.user_exists %]
+    'foo'
+    [% load_exercise(ex) %]
+  [% ELSE %]
+    'bar'
+    [% login_invite(ex) %]
+  [% END %]
+[% END %]
+[%# INCLUDE macros.tt %]
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
 "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en-GB">
  <head>
   [%# INCLUDE '_includes/head.html' %]
   [%# INCLUDE '_includes/ga.html' %]
-  <meta name="description" content="[% meta.description %]" />
-  <title>[% title %]</title>
+  <meta name="description" content="[%# meta.description %]" />
+  <title>[%# title %]</title>
  </head>
  <body>
   <div class="container">
@@ -13,7 +23,7 @@
    <div class="span-17 last">
    [% USE Markdown %]
    [% content | evaltt | markdown %]
-  <p><small>Last modified: [% ctime.iso8601 %]</small></p>
+  <p><small>Last modified: [%# ctime.iso8601 %]</small></p>
   <p>
    <small><a href="/~castaway/web">Home</a></small>
   </p>
