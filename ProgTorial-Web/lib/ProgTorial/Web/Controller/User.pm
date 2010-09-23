@@ -2,7 +2,11 @@ package ProgTorial::Web::Controller::User;
 use Moose;
 use namespace::autoclean;
 
-BEGIN {extends 'Catalyst::Controller::ActionRole'; }
+BEGIN {extends 'CatalystX::SimpleLogin::Controller::Login'; }
+
+## Ideally this should eventually be both login+register, 
+## see amazon + qype for inspiration
+use ProgTorial::Form::Register;
 
 =head1 NAME
 
@@ -16,7 +20,6 @@ Catalyst Controller.
 
 =cut
 
-
 =head2 index
 
 =cut
@@ -27,10 +30,37 @@ sub index :Path :Args(0) {
     $c->response->body('Matched ProgTorial::Web::Controller::User in User.');
 }
 
+## ??
 sub auth_user : Local Does('NeedsLogin') {
     my ( $self, $c ) = @_;
     $c->res->body('<h2>Hello, user!</h2>');
 }
+
+## /login action is included from the base class
+
+sub user_base :Chained('not_required') :PathPart('users') :CaptureArgs(0) {
+}
+
+sub register :Chained('user_base') :PathPart('register') :Args(0) {
+    my ($self, $c) = @_;
+
+    my $form = ProgTorial::Form::Register->new();
+    if($c->req->param()) {
+        $form->process($c->req->params);
+        if($form->validated) {
+            my $user_rs = $c->model('Database::User');
+            $user_rs->create( { 
+               ( map { $user_rs->result_source->has_column($_) ? ($_, $c->req->param($_)) : () }
+                keys %{ $c->req->params}),
+               displayname => $c->req->param('username')});
+            $c->res->redirect($c->uri_for('/'));
+        }
+    }
+
+    $c->stash(form => $form);
+
+} 
+
 
 =head1 AUTHOR
 

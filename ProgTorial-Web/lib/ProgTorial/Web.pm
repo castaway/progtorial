@@ -40,7 +40,8 @@ $VERSION = eval $VERSION;
 __PACKAGE__->config(
     name => 'ProgTorial::Web',
     'View::HTML' => {
-        STRICT => 1
+        STRICT => 1,
+        WRAPPER => 'wrapper.tt',
     },
     ## should be in conf file.
     'Controller::Chapter' => {
@@ -56,8 +57,10 @@ __PACKAGE__->config(
         realms => { 
             default => {
                 credential => {
-                    class => 'OpenID',
-                    ua_class => 'LWP::UserAgent',
+                    class => 'Password',
+                    password_field => 'password',
+                    password_type => 'hashed',
+                    password_hash_type => 'SHA-1',
                 },
                 store => {
                     class => 'DBIx::Class',
