@@ -9,6 +9,7 @@ use Module::Install::Catalyst; # Complain loudly if you don't have
 name 'ProgTorial-Web';
 all_from 'lib/ProgTorial/Web.pm';
 
+# requires 'Acme::HalfOfCPAN';
 requires 'Catalyst::Runtime' => '5.80025';
 requires 'Catalyst::Action::RenderView';
 requires 'Catalyst::Authentication::Credential::OpenID' => '0.16';
@@ -27,6 +28,7 @@ requires 'Path::Class' => '0.19';
 requires 'Moose';
 requires 'MooseX::Role::WithOverloading' => '0.08';
 requires 'MooseX::MethodAttributes' => '0.24';
+requires 'MooseX::StrictConstructor' => '0.11';
 requires 'namespace::autoclean';
 requires 'Config::General'; # This should reflect the config file format you've chosen
                  # See Catalyst::Plugin::ConfigLoader for supported formats
