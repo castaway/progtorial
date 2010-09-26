@@ -1,10 +1,10 @@
 [% MACRO include_exercise(ex) BLOCK %]
+<a name="[% exercise %]"></a>
   [% IF c.user_exists %]
-    'foo'
-    [% load_exercise(ex) %]
+    [% INCLUDE 'exercise/load_exercise.tt' exercise = ex %]
   [% ELSE %]
-    'bar'
-    [% login_invite(ex) %]
+    [% INCLUDE 'exercise/login_invite.tt' exercise = ex %]
+    [%# login_invite(ex) %]
   [% END %]
 [% END %]
 [%# INCLUDE macros.tt %]

@@ -40,7 +40,7 @@ $VERSION = eval $VERSION;
 __PACKAGE__->config(
     name => 'ProgTorial::Web',
     'View::HTML' => {
-        STRICT => 1,
+#        STRICT => 1,
         WRAPPER => 'wrapper.tt',
     },
     ## should be in conf file.
@@ -59,8 +59,9 @@ __PACKAGE__->config(
                 credential => {
                     class => 'Password',
                     password_field => 'password',
-                    password_type => 'hashed',
-                    password_hash_type => 'SHA-1',
+                    password_type => 'clear',
+#                    password_type => 'hashed',
+#                    password_hash_type => 'SHA-1',
                 },
                 store => {
                     class => 'DBIx::Class',

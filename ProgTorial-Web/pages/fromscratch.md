@@ -15,14 +15,14 @@ relationships.
 You should already have a good idea of what your database layout is,
 and how you want to be able to access it, before embarking on this
 tutorial. If you need help designing your database, have a look in
-L<Appendix3|DBIx::Class::Tutorial::Appendix3>, or buy a good book on
+[Appendix3](http://search.cpan.org/perldoc?DBIx::Class::Tutorial::Appendix3), or buy a good book on
 the subject.
 
 If you already have a database that you are using you can still create
 these files by hand following this chapter. You can also use
 [DBIx::Class::Schema::Loader](http://search.cpan.org/perldoc?DBIx::Class::Schema::Loader) to create them automatically. Read the
 documentation of that manual, or look in
-L<Appendix2|DBIx::Class::Tutorial::Appendix2> on how to do that.
+[Appendix2](http://search.cpan.org/perldoc?DBIx::Class::Tutorial::Appendix2) on how to do that.
 
 # GLOSSARY
 
@@ -47,7 +47,7 @@ to create Perl classes that define the layout of your database
 structure.
 
 There are three types of source files available. A
-L<Schema|DBIx::Class::Schema> class defines the top layer object that all
+[Schema](http://search.cpan.org/perldoc?DBIx::Class::Schema) class defines the top layer object that all
 other data is accessed via. The schema object is created with
 connection information for the particular database it will be talking
 to. You can create a second schema object to a different database
@@ -103,16 +103,16 @@ associated Result and ResultSet classes.
 
 `load_namespaces` does the actual work here, it loads all the files
 found in the `Result` and `ResultSet` subnamespaces of your schema,
-see L</A word about namespaces> above. It can be configured to use
+see [A word about namespaces](#pod_A word about namespaces) above. It can be configured to use
 other namespaces, or load only a subset of the available classes. See
 L<DBIx::Class::Schema/load_namespaces> for documentation.
 
-The loaded files are assumed to be actual L</Result classes> and
-L</ResultSet classes> if anything else is found in the subnamespaces,
+The loaded files are assumed to be actual [Result classes](#pod_Result classes) and
+[ResultSet classes](#pod_ResultSet classes) if anything else is found in the subnamespaces,
 the load will die.
 
 For discussions of alternative styles and methods of writing Schema
-classes, see L</Alternative Schema classes> below.
+classes, see [Alternative Schema classes](#pod_Alternative Schema classes) below.
 
 ## Result classes
 
@@ -371,6 +371,7 @@ The posts table looks like this in mysql:
     CONSTRAINT posts_fk_user_id FOREIGN KEY (user_id) REFERENCES users (id)
   );
 
+
 You will need another type of relationship for this class,
 `belongs_to`. Use it like this:
 
@@ -387,6 +388,8 @@ The third argument is the column in the current class that contains
 the primary key of the related class.
 
 Create the Result class for it.
+
+<a name="create_post_class"></a>
 
 [% include_exercise('create_post_class') %]
 
@@ -406,7 +409,7 @@ Installing [DBIx::Class](http://search.cpan.org/perldoc?DBIx::Class) will have a
 small one-file database which is useful for testing and portable
 databases for applications.
 
-We will discuss L<deployment|DBIx::Class::Tutorial::Deployment> more
+We will discuss [deployment](http://search.cpan.org/perldoc?DBIx::Class::Tutorial::Deployment) more
 at length later when talking about how to change your schema without
 having to destroy your existing data.
 
@@ -419,7 +422,7 @@ actually create and query some data from your database.
 
 # WHERE TO GO NEXT
 
-L<Creating and finding users|DBIx::Class::Tutorial::GettingStarted>
+[Creating and finding users](http://search.cpan.org/perldoc?DBIx::Class::Tutorial::GettingStarted)
 
 # TODO
 

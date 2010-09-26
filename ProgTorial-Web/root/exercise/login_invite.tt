@@ -1,0 +1,5 @@
+[%# logged out user %]
+[%# register/login form itself, or link to register/login? preferably former for seemless experience! %]
+
+<p> To solve this exercise, <a href="[% c.uri_for('/login') %]">Login to an existing user</a>
+</p>

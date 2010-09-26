@@ -1,0 +1,3 @@
+[%# Logged in user %]
+
+[% exercises.$exercise.render %]

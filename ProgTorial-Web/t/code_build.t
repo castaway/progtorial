@@ -23,33 +23,34 @@ my $cb = Safe::CodeBuilder->new({
                                  ## users own (chroot) environment named after this, so should be a valid path name?
                                  username => 'fred',
                                  ## project/dist to extract/build
-                                 project => 'MyDatabase',
+                                 ## tarball is t/projects/MyBlog-Schema.tar.gz
+                                 project => 'MyBlog-Schema',
                                  projects_dir => Path::Class::Dir->new('t/projects'),
                                  environments_dir => Path::Class::Dir->new('t/environments'),
                                 });
 
 isa_ok($cb, 'Safe::CodeBuilder');
 
-## eg, t/environments/fred/MyDatabase
+## eg, t/environments/fred/MyBlog-Schema
 ok(!-d $cb->environment_directory, 'Initially, no coding environment exists');
 
-## create chroot env and unpack MyDatabase.tar.gz (is it versioned?)
+## create chroot env and unpack MyBlog-Schema.tar.gz (is it versioned?)
 lives_ok(sub { $cb->create_environment_directory() }, 'Created code directory without failing');
 ok(-d $cb->environment_directory, 'Created coding environment');
 ok(-e $cb->environment_directory->file('usr/share/perl/5.10/strict.pm'), 'Copied strict.pm');
-ok(-e $cb->environment_directory->file('usr/src/MyDatabase/Makefile.PL'), 'Unpacked tarball there');
+ok(-e $cb->environment_directory->file('usr/src/MyBlog-Schema/Makefile.PL'), 'Unpacked tarball there');
 
 
 ## Make/Test compiled with empty enc, should pass:
-ok(!-e $cb->environment_directory->file('usr/src/MyDatabase/Makefile'), 'Project makefile doesn\'t exist yet');
+ok(!-e $cb->environment_directory->file('usr/src/MyBlog-Schema/Makefile'), 'Project makefile doesn\'t exist yet');
 ok($cb->compile_project(), 'Compiled project without errors');
-ok(-e $cb->environment_directory->file('usr/src/MyDatabase/Makefile'), 'Project makefile exists after compiling');
+ok(-e $cb->environment_directory->file('usr/src/MyBlog-Schema/Makefile'), 'Project makefile exists after compiling');
 
 ## Update/add code from user input:
 ok($cb->update_or_add_file({
-    filename => 'lib/MyDatabase/Schema/Result/Post.pm',
+    filename => 'lib/MyBlog/Schema/Result/Post.pm',
     content => << 'POSTPM',
-package MyDatabase::Schema::Result::Post;
+package MyBlog-Schema::Schema::Result::Post;
 
 use strict;
 use warnings
@@ -63,15 +64,15 @@ __PACKAGE__->set_primary_key('id');
 POSTPM
                            }), 'Added new file Post.pm to project');
 
-ok(-e $cb->environment_directory->dir('MyDatabase/lib/MyDatabase/Schema/Result')->file('Post.pm'), 'New Post.pm file exists');
+ok(-e $cb->environment_directory->dir('MyBlog-Schema/lib/MyBlog/Schema/Result')->file('Post.pm'), 'New Post.pm file exists');
 ok($cb->compile_project(), 'Project still compiles');
 is_deeply([$cb->errors], [], 'No errors to report');
 
 ## Add broken file:
 ok($cb->update_or_add_file({
-    filename => 'MyDatabase/lib/MyDatabase/Schema/Result/Test.pm',
+    filename => 'MyBlog-Schema/lib/MyBlog/Schema/Result/Test.pm',
     content => << 'TESTPM',
-package MyDatabase::Schema::Result::Test;
+package MyBlog-Schema::Schema::Result::Test;
 
 use strict;
 use warnings
@@ -88,7 +89,7 @@ TESTPM
 
 ok(!$cb->compile_project(), 'Project doesn\'t compile (errors in code)');
 ## The actual error text here needs fixing:
-is_deeply([$cb->errors], ['MyDatabase/lib/MyDatabase/Schema/Result/Test.pm: Error on line 9'], 'Found errors');
+is_deeply([$cb->errors], ['MyBlog-Schema/lib/MyBlog/Schema/Result/Test.pm: Error on line 9'], 'Found errors');
 
 ## at some point we need to repack the users work into a tarball so we can remove the env if needed..
 $cb->tidyup;

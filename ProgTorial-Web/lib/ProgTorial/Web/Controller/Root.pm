@@ -31,7 +31,7 @@ The root page (/)
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
 
-    
+    $c->log->_dump($c->session);
 }
 
 =head2 default

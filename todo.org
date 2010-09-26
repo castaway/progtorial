@@ -19,9 +19,9 @@
    CLOCK: [2010-09-18 Sat 15:09]--[2010-09-18 Sat 16:34] =>  1:25
 * Coding
 ** TODO "Clone" new user environment
-*** TODO Hardlink the perlbrew and dep modules (by path so user of progtorial can supply their own)
+*** DONE Hardlink the perlbrew and dep modules (by path so user of progtorial can supply their own)
 *** TODO Copy / unpack the bare skeleton into user env
-** TODO Setup webframework to build the dbic tutorial application in
+** DONE Setup webframework to build the dbic tutorial application in
 *** DONE Install catalyst (in its own perlbrew/locallib?)
     CLOCK: [2010-09-18 Sat 17:43]--[2010-09-18 Sat 19:09] =>  1:26
 *** TODO Set up authentication (CatalystX::Login?)
@@ -37,9 +37,30 @@
    CLOCK: [2010-09-19 Sun 17:31]--[2010-09-19 Sun 17:53] =>  0:22
    CLOCK: [2010-09-19 Sun 16:42]--[2010-09-19 Sun 17:09] =>  0:27
 ** TODO Make chapter page interactive if user logged in
+*** DONE Show appropriate exercise form when user logged in
+   CLOCK: [2010-09-26 Sun 14:16]--[2010-09-26 Sun 17:49] =>  3:33
    CLOCK: [2010-09-20 Mon 08:35]--[2010-09-20 Mon 09:05] =>  0:30
+*** TODO Set exercise hidden field on exercise form
+*** TODO 'Validate' exercise form
 ** TODO Setup tutorial pages layout, use html links to start/next/previous/contents etc
 ** TODO Setup minimal navigation  (to all pages from any)
 ** TODO Create initial tutorial page to add interactivity to
+* Features
+** Download tarball of your current solution
+** Download tarball of site solution
+** POD support, using =begin exercise, or just TT inserts ?
+** Developers area
+** Upload tutorials
+** Beta / review new tutorials
+** Ratings
+** Reccomentations / friends
+** % tutorial done/completed
+** "Skip ahead" feature
+* Tutorials
+** Perl intro  (based on modern perl book?)
+** Moose
+** Catalyst
+** Template toolkit
+** FormHandler
 
-
+ 
