@@ -41,7 +41,12 @@ sub create_environment_directory {
        )) {
     $self->insert_hardlink($_);
   }
-  $self->extract_archive($self->projects_dir->file($self->project.'.tar.gz'));
+  $self->extract_archive($self->projects_dir->file($self->project.'-0.01.tar.gz'));
+}
+
+sub run_in_child {
+  my ($self, @command) = @_;
+  
 }
 
 sub extract_archive {
