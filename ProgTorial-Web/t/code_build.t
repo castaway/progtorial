@@ -40,13 +40,13 @@ ok(!-d $cb->environment_directory, 'Initially, no coding environment exists');
 lives_ok(sub { $cb->create_environment_directory() }, 'Created code directory without failing');
 ok(-d $cb->environment_directory, 'Created coding environment');
 ok(-e $cb->environment_directory->file('usr/share/perl/5.10/strict.pm'), 'Copied strict.pm');
-ok(-e $cb->environment_directory->file('MyBlog-Schema/Makefile.PL'), 'Unpacked tarball there');
+ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile.PL'), 'Unpacked tarball there');
 
 
 ## Make/Test compiled with empty enc, should pass:
 ok(!-e $cb->environment_directory->file('MyBlog-Schema/Makefile'), 'Project makefile doesn\'t exist yet');
 ok($cb->compile_project(), 'Compiled project without errors');
-ok(-e $cb->environment_directory->file('MyBlog-Schema/Makefile'), 'Project makefile exists after compiling');
+ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile'), 'Project makefile exists after compiling');
 
 ## Update/add code from user input:
 ok($cb->update_or_add_file({
@@ -72,7 +72,7 @@ is_deeply([$cb->errors], [], 'No errors to report');
 
 ## Add broken file:
 ok($cb->update_or_add_file({
-    filename => 'MyBlog-Schema/lib/MyBlog/Schema/Result/Test.pm',
+    filename => 'MyBlog-Schema-0.01/lib/MyBlog/Schema/Result/Test.pm',
     content => << 'TESTPM',
 package MyBlog-Schema::Schema::Result::Test;
 
@@ -91,7 +91,7 @@ TESTPM
 
 ok(!$cb->compile_project(), 'Project doesn\'t compile (errors in code)');
 ## The actual error text here needs fixing:
-is_deeply([$cb->errors], ['MyBlog-Schema/lib/MyBlog/Schema/Result/Test.pm: Error on line 9'], 'Found errors');
+is_deeply([$cb->errors], ['MyBlog-Schema-0.01/lib/MyBlog/Schema/Result/Test.pm: Error on line 9'], 'Found errors');
 
 ## at some point we need to repack the users work into a tarball so we can remove the env if needed..
 $cb->tidyup;
