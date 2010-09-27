@@ -16,6 +16,8 @@ use Test::More;
 use Test::Exception;
 use Path::Class;
 
+Path::Class::Dir->new('t/environments/fred')->rmtree;
+
 ## Probably needs a better name
 use_ok('Safe::CodeBuilder');
 
@@ -38,13 +40,13 @@ ok(!-d $cb->environment_directory, 'Initially, no coding environment exists');
 lives_ok(sub { $cb->create_environment_directory() }, 'Created code directory without failing');
 ok(-d $cb->environment_directory, 'Created coding environment');
 ok(-e $cb->environment_directory->file('usr/share/perl/5.10/strict.pm'), 'Copied strict.pm');
-ok(-e $cb->environment_directory->file('usr/src/MyBlog-Schema/Makefile.PL'), 'Unpacked tarball there');
+ok(-e $cb->environment_directory->file('MyBlog-Schema/Makefile.PL'), 'Unpacked tarball there');
 
 
 ## Make/Test compiled with empty enc, should pass:
-ok(!-e $cb->environment_directory->file('usr/src/MyBlog-Schema/Makefile'), 'Project makefile doesn\'t exist yet');
+ok(!-e $cb->environment_directory->file('MyBlog-Schema/Makefile'), 'Project makefile doesn\'t exist yet');
 ok($cb->compile_project(), 'Compiled project without errors');
-ok(-e $cb->environment_directory->file('usr/src/MyBlog-Schema/Makefile'), 'Project makefile exists after compiling');
+ok(-e $cb->environment_directory->file('MyBlog-Schema/Makefile'), 'Project makefile exists after compiling');
 
 ## Update/add code from user input:
 ok($cb->update_or_add_file({

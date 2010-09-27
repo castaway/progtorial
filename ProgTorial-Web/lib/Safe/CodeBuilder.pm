@@ -2,6 +2,7 @@ package Safe::CodeBuilder;
 use Moose;
 use MooseX::StrictConstructor;
 use Module::CoreList;
+use Archive::Extract;
 
 has 'username',         is => 'ro';
 has 'project',          is => 'ro';
@@ -40,6 +41,13 @@ sub create_environment_directory {
        )) {
     $self->insert_hardlink($_);
   }
+  $self->extract_archive($self->projects_dir->file($self->project.'.tar.gz'));
+}
+
+sub extract_archive {
+  my ($self, $archive) = @_;
+  my $ae = Archive::Extract->new(archive => $archive);
+  $ae->extract(to => $self->environment_directory) or die $ae->error;
 }
 
 sub insert_hardlink {
