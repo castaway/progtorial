@@ -30,7 +30,7 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key('id');
 __PACKAGE__->add_unique_constraint('username_idx' => ['username']);
-__PACKAGE__->has_many('posts', 'MyBlog::Schema::Result::Post', 'user_id');
+# __PACKAGE__->has_many('posts', 'MyBlog::Schema::Result::Post', 'user_id');
 
 1;
 
