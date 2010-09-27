@@ -56,6 +56,7 @@
 ** Reccomentations / friends
 ** % tutorial done/completed
 ** "Skip ahead" feature
+** Instructions on how to set up your own coding env, download tarball etc
 * Tutorials
 ** Perl intro  (based on modern perl book?)
 ** Moose

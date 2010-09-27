@@ -45,8 +45,7 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
 
     ## chapter.cfg
     my $config = $self->find_config($chapter_file);
-    $c->stash(exercises => $self->load_exercises($config));
-
+    $c->stash(exercises => $self->load_exercises($c, $config, $chapter));
 
 #    $c->stash(load_exercise => sub { my $exercise = shift; return $exercise });
     $c->stash(login_invite => sub { 
@@ -58,8 +57,8 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
         $c->session->{redirect_to_after_login} = $here->as_string;
         $c->log->_dump($c->session);
 
-        $c->stash(template => 'exercise/login_invite.tt');
-        return $c->forward($c->view);
+#        $c->stash(template => 'exercise/login_invite.tt');
+        return $c->view->render($c, 'exercise/login_invite.tt', {no_wrapper => 1});
               });
 }
 
@@ -110,14 +109,19 @@ sub find_config {
 
 }
 
+## the uri_for in here is a bit ugly, and its the only reason we pass 
+## $c and $chapter !?
 ## load exercise forms for given config file:
 sub load_exercises {
-    my ($self, $config) = @_;
+    my ($self, $c, $config, $chpater) = @_;
 
     return {map {
         print STDERR "Ex: $_\n";
-        my $form = ProgTorial::Form::Exercise->new(params => { exercise => $_ });
-        print STDERR "Form:", $form->render, "\n";;
+        my $form = ProgTorial::Form::Exercise->new();
+        $form->field('exercise')->value($_);
+#        $form->action($c->uri_for($self->action('exercise'), 
+#                                  [ $chapter ]));
+#        print STDERR "Form:", $form->render, "\n";
         ( $_ => $form );
             }
             @{ $config->{exercises} } 

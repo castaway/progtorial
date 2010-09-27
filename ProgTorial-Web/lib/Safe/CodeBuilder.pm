@@ -51,6 +51,7 @@ sub run_in_child {
 
 sub extract_archive {
   my ($self, $archive) = @_;
+  die "No such archive: $archive" if!-e $archive;
   my $ae = Archive::Extract->new(archive => $archive);
   $ae->extract(to => $self->environment_directory) or die $ae->error;
 }

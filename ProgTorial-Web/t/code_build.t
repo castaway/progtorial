@@ -39,7 +39,8 @@ ok(!-d $cb->environment_directory, 'Initially, no coding environment exists');
 ## create chroot env and unpack MyBlog-Schema.tar.gz (is it versioned?)
 lives_ok(sub { $cb->create_environment_directory() }, 'Created code directory without failing');
 ok(-d $cb->environment_directory, 'Created coding environment');
-ok(-e $cb->environment_directory->file('usr/share/perl/5.10/strict.pm'), 'Copied strict.pm');
+## Assumes debian ish 5.10 env
+# ok(-e $cb->environment_directory->file('usr/share/perl/5.10/strict.pm'), 'Copied strict.pm');
 ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile.PL'), 'Unpacked tarball there');
 
 
