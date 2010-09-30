@@ -47,7 +47,16 @@ sub create_environment_directory {
 sub run_in_child {
   my ($self, @command) = @_;
 
-  `sudo chroot --userspec 10005:10012 @command`;
+  my $envdir = $self->environment_directory;
+
+  local $ENV{LANG} = 'C';
+  return `sudo chroot --userspec 10005:10012 "$envdir" sh -c '@command'`;
+}
+
+sub compile_project {
+  my ($self) = @_;
+  
+  $self->run_in_child('cd /MyBlog-Schema-0.01/; perl Makefile.PL');
 }
 
 sub extract_archive {
@@ -102,12 +111,21 @@ sub insert_hardlink {
       }
     }
     
-    if (!-l $src and $src !~ m/\.pm$/) {
-      warn "Getting magic for $src";
+    if (!-l $src) {
+      # For a few filename patterns, we can assume they are what they appear to be.
+      # The consequences of getting this wrong are minimal.
+      my $magic;
+      if ($src =~ m/\.(?:ix|al|pm)$/) {
+        $magic = 'Perl5 module source text';
+      } elsif ($src =~ m/\.so$/) {
+        $magic = 'ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.18, stripped';
+      } else {
+        warn "Getting magic for $src";
+        
+        $magic = `file $src`;
+        chomp $magic;
+      }
 
-      my $magic = `file $src`;
-      chomp $magic;
-      
       if ($magic =~ m/dynamically linked/) {
         my $ldd = `ldd $src`;
         for my $line (split /\n/, $ldd) {
