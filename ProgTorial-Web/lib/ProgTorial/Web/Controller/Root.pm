@@ -31,6 +31,7 @@ The root page (/)
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
 
+    $c->forward('/navigation');
     $c->log->_dump($c->session);
 }
 
@@ -44,6 +45,18 @@ sub default :Path {
     my ( $self, $c ) = @_;
     $c->response->body( 'Page not found' );
     $c->response->status(404);
+}
+
+sub navigation : Private {
+    my ($self, $c) = @_;
+
+    $c->stash('navigation' => [
+                  { url => $c->uri_for('/login'), name => 'Login' },
+                  { url => $c->uri_for('/logout'), name => 'Logout' },
+                  { url => $c->uri_for('/tutorials'), name => 'Tutorials' },
+              ],
+        current_page => $c->req->uri,
+        );
 }
 
 =head2 end

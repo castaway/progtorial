@@ -27,6 +27,9 @@ Catalyst Controller.
 =cut
 
 sub base :Chained('/') :PathPart('chapter') :CaptureArgs(0) {
+    my ($self, $c) = @_;
+
+    $c->forward('/navigation');
 }
 
 # id chain, current chapter /chapter/X
@@ -60,6 +63,12 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
 #        $c->stash(template => 'exercise/login_invite.tt');
         return $c->view->render($c, 'exercise/login_invite.tt', {no_wrapper => 1});
               });
+}
+
+## Exercise submission
+sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
+    my ($self, $c) = @_;
+
 }
 
 sub chapter_index :Chained('chapter') :PathPart('') :Args(0) {
@@ -113,14 +122,14 @@ sub find_config {
 ## $c and $chapter !?
 ## load exercise forms for given config file:
 sub load_exercises {
-    my ($self, $c, $config, $chpater) = @_;
+    my ($self, $c, $config, $chapter) = @_;
 
     return {map {
         print STDERR "Ex: $_\n";
         my $form = ProgTorial::Form::Exercise->new();
         $form->field('exercise')->value($_);
-#        $form->action($c->uri_for($self->action('exercise'), 
-#                                  [ $chapter ]));
+        $form->action($c->uri_for($self->action_for('exercise'), 
+                                  [ $chapter ]));
 #        print STDERR "Form:", $form->render, "\n";
         ( $_ => $form );
             }

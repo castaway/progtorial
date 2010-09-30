@@ -12,7 +12,7 @@
   <div class="container">
     [%# INCLUDE _includes/leftnav.html %]
    <div class="span-6">
-     NAV
+     [% INCLUDE navigation.tt %]
    </div>
    <div class="span-17 last">
    [% content | evaltt %]

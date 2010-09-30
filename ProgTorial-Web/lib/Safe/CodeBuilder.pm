@@ -46,7 +46,8 @@ sub create_environment_directory {
 
 sub run_in_child {
   my ($self, @command) = @_;
-  
+
+  `sudo chroot --userspec 10005:10012 @command`;
 }
 
 sub extract_archive {
