@@ -43,9 +43,11 @@ ok(-d $cb->environment_directory, 'Created coding environment');
 # ok(-e $cb->environment_directory->file('usr/share/perl/5.10/strict.pm'), 'Copied strict.pm');
 ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile.PL'), 'Unpacked tarball there');
 
+my $chown = 'chmod -R 777 ' . $cb->environment_directory;
+`$chown`;
 
 ## Make/Test compiled with empty enc, should pass:
-ok(!-e $cb->environment_directory->file('MyBlog-Schema/Makefile'), 'Project makefile doesn\'t exist yet');
+ok(!-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile'), 'Project makefile doesn\'t exist yet');
 ok($cb->compile_project(), 'Compiled project without errors');
 ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile'), 'Project makefile exists after compiling');
 
