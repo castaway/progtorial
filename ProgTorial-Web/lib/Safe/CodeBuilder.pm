@@ -29,12 +29,14 @@ sub create_environment_directory {
   
   for (which('perl'),
        '/bin/bash',
-       '/bin/sh',
        '/usr/bin/make',
        '/dev/null',
        '/dev/urandom',
+       (map {which($_)} qw<echo ls cat test [ sh which chmod chown touch true false cp>),
        pm_file('Config')->parent->file('Config_heavy.pl'),
        pm_file('Config')->parent->file('Config_git.pl'),
+       # The core header files, required by MakeMaker even for non-XS modules.
+       pm_file('Config')->parent->subdir('CORE'),
        (map {pm_file($_)}
         grep {!($_ ~~ ['Time::Piece::Seconds', 'XS::APItest', 'DCLsym', 'Unicode', 'CGI::Fast', qr/Win32/])}
         keys %{$Module::CoreList::version{$]}}
@@ -50,18 +52,23 @@ sub run_in_child {
   my $envdir = $self->environment_directory;
 
   my $perl_dir = Path::Class::File->new(which('perl'))->dir;
-  unshift @command, "export PATH=$perl_dir;";
+  unshift @command, "export LANG=C; export PATH=$perl_dir:/usr/bin:/bin;";
   print STDERR "Running @command\n";
   local $ENV{LANG} = 'C';
   my $full_cmd = qq<sudo chroot --userspec 10005:10012 "$envdir" sh -c '@command'>;
   print "running $full_cmd\n";
-  return `$full_cmd`;
+  $| = 1;
+  my $ret =`$full_cmd`;
+  print $ret;
+  return $ret;
 }
 
 sub compile_project {
   my ($self) = @_;
   
-  $self->run_in_child('cd /MyBlog-Schema-0.01/; perl Makefile.PL');
+  my $dir_inside = '/'.$self->project.'-0.01/';
+  $self->run_in_child("cd $dir_inside; perl Makefile.PL");
+  $self->run_in_child("cd $dir_inside; make");
 }
 
 sub extract_archive {
@@ -88,12 +95,12 @@ sub insert_hardlink {
 
 
   my $orig_src = $src;
-  print "insert_hardlink($src)\n";
+  #print "insert_hardlink($src)\n";
   # We want to keep ".." from showing up, but we don't want to get the "real" name of symlinks.
   $src =~ s![^/]+/\.\./!/!;
-  print " ... manual fuckery -> $src\n" if $src ne $orig_src;
+  #print " ... manual fuckery -> $src\n" if $src ne $orig_src;
   $orig_src = $src;
-  print " ... cleanup -> $src\n" if $src ne $orig_src;
+  #print " ... cleanup -> $src\n" if $src ne $orig_src;
   $src = Path::Class::File->new($src)->cleanup;
   
   my $dest = Path::Class::File->new($self->environment_directory, "$src");
@@ -109,7 +116,8 @@ sub insert_hardlink {
     Path::Class::Dir->new($dest)->mkpath;
     $self->insert_hardlink($_) for $src->children;
   } elsif (-c $src) {
-    my @args = ('mknod',
+    my @args = ('sudo',
+                'mknod',
                 '--mode' => sprintf("0%o", 0777 & $src->stat->mode),
                 $dest,
                 'c',
