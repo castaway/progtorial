@@ -155,10 +155,9 @@ sub insert_hardlink {
         for my $line (split /\n/, $ldd) {
           if ($line =~ m/statically linked/) {
             next;
-          } elsif ($line =~ m/ => (.*) \(0x/) {
-            # Empty dest?  Normally seems to happen as "linux-gate.so.1 =>  (0xb774e000)" or similar.
-            next;
-          } elsif ($line =~ m!^\s*(/.*) \(0x!) {
+          } elsif ($line =~ m/ => (.?) \(0x/) {
+            $self->insert_hardlink($1);
+          } elsif ($line =~ m!^\s*(/.?) \(0x!) {
             $self->insert_hardlink($1);
           } else {
             die "Don't know what to do for ldd line '$line' from $src";
