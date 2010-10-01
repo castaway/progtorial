@@ -117,7 +117,10 @@ sub insert_hardlink {
     
     #print "$src magic: $magic\n";
     if (-l $src) {
-      my $to = Path::Class::File->new($src->parent, readlink($src));
+      my $to = Path::Class::File->new(readlink($src));
+      if ($to->is_relative) {
+        $to = Path::Class::File->new($src->parent, readlink($src));
+      }
       print "$src is a symlink to $to\n";
       if (!-e $to) {
         print "symlink $src is broken, leaving it broken!\n";
@@ -148,7 +151,8 @@ sub insert_hardlink {
           if ($line =~ m/statically linked/) {
             next;
           } elsif ($line =~ m/ => (.*) \(0x/) {
-            $self->insert_hardlink($1);
+            # Empty dest?  Normally seems to happen as "linux-gate.so.1 =>  (0xb774e000)" or similar.
+            next;
           } elsif ($line =~ m!^\s*(/.*) \(0x!) {
             $self->insert_hardlink($1);
           } else {
