@@ -155,9 +155,10 @@ sub insert_hardlink {
         for my $line (split /\n/, $ldd) {
           if ($line =~ m/statically linked/) {
             next;
-          } elsif ($line =~ m/ => (.?) \(0x/) {
+          } elsif ($line =~ m/ => (.+) \(0x/) {
+            # '	libnsl.so.1 => /lib/libnsl.so.1 (0xb7828000)'
             $self->insert_hardlink($1);
-          } elsif ($line =~ m!^\s*(/.?) \(0x!) {
+          } elsif ($line =~ m!^\s*(/.+) \(0x!) {
             $self->insert_hardlink($1);
           } else {
             die "Don't know what to do for ldd line '$line' from $src";
