@@ -49,8 +49,13 @@ sub run_in_child {
 
   my $envdir = $self->environment_directory;
 
+  my $perl_dir = Path::Class::File->new(which('perl'))->dir;
+  unshift @command, "export PATH=$perl_dir;";
+  print STDERR "Running @command\n";
   local $ENV{LANG} = 'C';
-  return `sudo chroot --userspec 10005:10012 "$envdir" sh -c '@command'`;
+  my $full_cmd = qq<sudo chroot --userspec 10005:10012 "$envdir" sh -c '@command'>;
+  print "running $full_cmd\n";
+  return `$full_cmd`;
 }
 
 sub compile_project {
