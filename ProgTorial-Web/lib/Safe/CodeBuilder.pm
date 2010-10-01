@@ -160,6 +160,11 @@ sub insert_hardlink {
             $self->insert_hardlink($1);
           } elsif ($line =~ m!^\s*(/.+) \(0x!) {
             $self->insert_hardlink($1);
+          } elsif ($line =~ m! =>  \(0x!) {
+            # linux-gate.so.1 =>  (0xb785c000)
+            # http://www.trilithium.com/johan/2005/08/linux-gate/
+            # The empty bit after the => is because ldd can't find the file.  That's OK, because it's not actually supposed to exist.
+            next;
           } else {
             die "Don't know what to do for ldd line '$line' from $src";
           }
