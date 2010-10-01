@@ -77,8 +77,23 @@ sub insert_hardlink {
   if (!ref $src) {
     $src = Path::Class::File->new($src);
   }
+
+  # castaway's perl setup is a bit... odd.
+  # PATH points to /home/castaway/perl5/perlbrew/bin/perl
+  #  -> /home/castaway/perl5/perlbrew/perls/current/bin/perl5.10.1
+  #     which is an actual binary file.
+  # HOWEVER:
+  # /home/castaway/perl5/perlbrew/perls/current
+  #  -> perl-5.10.1
+
+
+  my $orig_src = $src;
+  print "insert_hardlink($src)\n";
   # We want to keep ".." from showing up, but we don't want to get the "real" name of symlinks.
   $src =~ s![^/]+/\.\./!/!;
+  print " ... manual fuckery -> $src\n" if $src ne $orig_src;
+  $orig_src = $src;
+  print " ... cleanup -> $src\n" if $src ne $orig_src;
   $src = Path::Class::File->new($src)->cleanup;
   
   my $dest = Path::Class::File->new($self->environment_directory, "$src");
@@ -108,6 +123,7 @@ sub insert_hardlink {
     #print "$src magic: $magic\n";
     if (-l $src) {
       my $to = Path::Class::File->new($src->parent, readlink($src));
+      print "$src is a symlink to $to\n";
       if (!-e $to) {
         print "symlink $src is broken, leaving it broken!\n";
       } else {
@@ -125,7 +141,7 @@ sub insert_hardlink {
       } elsif ($src =~ m/\.so$/) {
         $magic = 'ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.18, stripped';
       } else {
-        warn "Getting magic for $src";
+        # warn "Getting magic for $src";
         
         $magic = `file $src`;
         chomp $magic;
