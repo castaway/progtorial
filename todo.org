@@ -18,7 +18,7 @@
 ** DONE Create bare skeleton of dbic tutorial (makefile, basic schema)
    CLOCK: [2010-09-18 Sat 15:09]--[2010-09-18 Sat 16:34] =>  1:25
 * Coding
-** TODO "Clone" new user environment
+** DONE "Clone" new user environment
 *** DONE Hardlink the perlbrew and dep modules (by path so user of progtorial can supply their own)
 *** TODO Copy / unpack the bare skeleton into user env
 ** DONE Setup webframework to build the dbic tutorial application in
@@ -43,8 +43,8 @@
 *** TODO Set exercise hidden field on exercise form
 *** TODO 'Validate' exercise form
 ** TODO Setup tutorial pages layout, use html links to start/next/previous/contents etc
-** TODO Setup minimal navigation  (to all pages from any)
-** TODO Create initial tutorial page to add interactivity to
+** DONE Setup minimal navigation  (to all pages from any)
+** DONE Create initial tutorial page to add interactivity to
 * Features
 ** Download tarball of your current solution
 ** Download tarball of site solution

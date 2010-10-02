@@ -30,13 +30,24 @@ sub base :Chained('/') :PathPart('chapter') :CaptureArgs(0) {
     my ($self, $c) = @_;
 
     $c->forward('/navigation');
+
+#    $c->log->_dump($self->get_chapter_configs);
+    my @chapter_nav = map { { url => $c->uri_for( 
+                                  $self->action_for('chapter_index'), 
+                                  [$_->{chapter}]
+                                  ),
+                                  name => $_->{chapter} }
+    }
+    (sort { $a->{order} <=> $b->{order} } $self->get_chapter_configs);
+
+    push @{$c->stash->{navigation}}, @chapter_nav;
 }
 
 # id chain, current chapter /chapter/X
 sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
     my ($self, $c, $chapter) = @_;
 
-    ## chapter.md
+    ## <chapter>.md
     my $chapter_file = $self->find_chapter($chapter);
     
     ## Catch random rubbish in url and send back to start.
@@ -46,11 +57,11 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
         return $c->res->redirect($c->uri_for('/'));
     }
 
-    ## chapter.cfg
+    ## <chapter>.cfg
     my $config = $self->find_config($chapter_file);
+    $c->stash(config => $config);
     $c->stash(exercises => $self->load_exercises($c, $config, $chapter));
 
-#    $c->stash(load_exercise => sub { my $exercise = shift; return $exercise });
     $c->stash(login_invite => sub { 
         my $exercise = shift; 
         my $here = $c->req->uri;
@@ -85,6 +96,15 @@ sub chapter_index :Chained('chapter') :PathPart('') :Args(0) {
 
 #     $c->response->body('Matched ProgTorial::Web::Controller::Chapter in Chapter.');
 # }
+
+sub get_chapter_configs {
+    my ($self) = @_;
+
+    my $pdir = $self->pages_path;
+    my @chapters = grep { $_->basename =~ /\.md$/ } $pdir->children;
+
+    return map { $self->find_config($_) } @chapters;
+}
 
 sub find_chapter {
     my ($self, $chapter) = @_;

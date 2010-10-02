@@ -22,6 +22,7 @@ requires 'Catalyst::Plugin::Session::State::Cookie' => '0.17';
 requires 'Catalyst::Plugin::Static::Simple' => '0.29';
 requires 'Catalyst::View::TT' => '0.34';
 requires 'Catalyst::Model::DBIC::Schema' => '0.43';
+requires 'Catalyst::Model::Factory' => '0.09';
 requires 'CatalystX::SimpleLogin' => '0.12';
 requires 'Template::Plugin::Markdown' => '0.02';
 requires 'Path::Class' => '0.19';
