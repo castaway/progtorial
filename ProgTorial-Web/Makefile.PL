@@ -33,6 +33,7 @@ requires 'MooseX::StrictConstructor' => '0.11';
 requires 'namespace::autoclean';
 requires 'Config::General'; # This should reflect the config file format you've chosen
                  # See Catalyst::Plugin::ConfigLoader for supported formats
+requires 'JSON::Any' => '1.22';
 test_requires 'Test::More' => '0.88';
 catalyst;
 

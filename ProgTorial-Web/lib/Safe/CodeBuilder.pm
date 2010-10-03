@@ -3,6 +3,7 @@ use Moose;
 use MooseX::StrictConstructor;
 use Module::CoreList;
 use Archive::Extract;
+use JSON::Any;
 
 has 'username',         is => 'ro';
 has 'project',          is => 'ro';
@@ -37,6 +38,8 @@ sub create_environment_directory {
        pm_file('Config')->parent->file('Config_git.pl'),
        # The core header files, required by MakeMaker even for non-XS modules.
        pm_file('Config')->parent->subdir('CORE'),
+       # Required for running tests.
+       pm_file('JSON::Any'),
        (map {pm_file($_)}
         grep {!($_ ~~ ['Time::Piece::Seconds', 'XS::APItest', 'DCLsym', 'Unicode', 'CGI::Fast', qr/Win32/])}
         keys %{$Module::CoreList::version{$]}}
@@ -69,6 +72,39 @@ sub compile_project {
   my $dir_inside = '/'.$self->project.'-0.01/';
   $self->run_in_child("cd $dir_inside; perl Makefile.PL");
   $self->run_in_child("cd $dir_inside; make");
+}
+
+sub run_test {
+  my ($self, @testnames) = @_;
+  
+  open my $outfh, ">", $self->environment_directory
+    ->subdir($self->project.'-0.01')
+      ->file('runtests.pl');
+  print $outfh <<'END_RUNTESTS';
+#!/usr/bin/perl
+use warnings;
+use strict;
+use TAP::Harness;
+use JSON::Any;
+
+my @tests;
+if (@ARGV) {
+  @tests = @ARGV;
+} else {
+  @tests = glob('t/*.t');
+}
+
+my $harness = TAP::Harness->new(verbosity => -3);
+my $aggregator = $harness->run_tests(@tests);
+my $json = JSON::Any->objToJson($aggregator);
+open my $outfh, ">", 'tests.json' or die "Couldn't open tests.json: $!";
+print $outfh $json;
+END_RUNTESTS
+  
+  $self->run_in_child('cd '.$self->project.'-0.01; perl runtests.pl '.join(' ', @testnames));
+
+  my $json = do {local(@ARGV, $/) = $self->environment_directory->subdir($self->project.'-0.01')->file('tests.json'); <>};
+  JSON::Any->jsonToObj($json);
 }
 
 sub extract_archive {
