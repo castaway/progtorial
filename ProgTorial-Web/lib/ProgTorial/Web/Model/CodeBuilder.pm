@@ -18,8 +18,8 @@ sub prepare_arguments {
     return {
         username => $c->user->username,
         project => $c->session->{current_project},
-        project_dir => Path::Class::Dir->new($c->config->{projects_dir}),
-        
+        projects_dir => $c->config->{projects_path},
+        environments_dir => $c->config->{env_path},
     };
 }
 

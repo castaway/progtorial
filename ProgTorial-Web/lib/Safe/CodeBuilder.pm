@@ -25,6 +25,7 @@ sub create_environment_directory {
   my ($self) = @_;
 
   my $dest = $self->environment_directory;
+  return 1 if(-d $dest);
   $dest->mkpath;
   
   for (which('perl'),
@@ -56,10 +57,10 @@ sub run_in_child {
   print STDERR "Running @command\n";
   local $ENV{LANG} = 'C';
   my $full_cmd = qq<sudo chroot --userspec 10005:10012 "$envdir" sh -c '@command'>;
-  print "running $full_cmd\n";
+  print STDERR "running $full_cmd\n";
   $| = 1;
   my $ret =`$full_cmd`;
-  print $ret;
+  print STDERR $ret;
   return $ret;
 }
 
@@ -124,7 +125,7 @@ sub insert_hardlink {
                 # This math is linux-specific
                 $src->stat->rdev >> 8,
                 $src->stat->rdev & 0xFF);
-    print join(" ", @args), "\n";
+    print STDERR join(" ", @args), "\n";
     system @args;
   } elsif (-f $src) {
     
@@ -134,9 +135,9 @@ sub insert_hardlink {
       if ($to->is_relative) {
         $to = Path::Class::File->new($src->parent, readlink($src));
       }
-      print "$src is a symlink to $to\n";
+      print STDERR "$src is a symlink to $to\n";
       if (!-e $to) {
-        print "symlink $src is broken, leaving it broken!\n";
+        print STDERR "symlink $src is broken, leaving it broken!\n";
       } else {
         # print "$src -> $to\n";
         $self->insert_hardlink($to);

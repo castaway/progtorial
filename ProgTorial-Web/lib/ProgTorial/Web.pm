@@ -2,6 +2,7 @@ package ProgTorial::Web;
 use Moose;
 use namespace::autoclean;
 
+use Path::Class;
 use Catalyst::Runtime 5.80;
 
 # Set flags and add plugins for the application
@@ -47,6 +48,8 @@ __PACKAGE__->config(
     'Controller::Chapter' => {
         pages_path => ProgTorial::Web->path_to('pages'),
     },
+    projects_path => Path::Class::Dir->new('/usr/src/perl/progtorial/skeletons/'),
+    env_path => Path::Class::Dir->new('/tmp'),
 #    'Controller::User' => { traits => 'Login::OpenID' },
     'Controller::Login' => {
 #        traits => ['OpenID'],

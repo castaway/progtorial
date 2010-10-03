@@ -8,6 +8,7 @@ use ProgTorial::Form::Exercise;
 use Config::Any::JSON;
 
 has 'pages_path' => (is => 'rw', isa => 'Path::Class::Dir', required => 1);
+# has 'env_path' => (is => 'rw', isa => 'Path::Class::Dir', required => 1);
 
 =head1 NAME
 
@@ -62,6 +63,17 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
     $c->stash(config => $config);
     $c->stash(exercises => $self->load_exercises($c, $config, $chapter));
 
+    if($c->session_expires(1)) {
+        ## Store current project associated with this chapter, to send to
+        ## CodeBuilder when on exercise submission
+        $c->session(current_project => $config->{distribution});
+
+        ## Where should this go?
+        if($c->user_exists) {
+            $c->model('CodeBuilder')->create_environment_directory();
+        }
+    }
+
     $c->stash(login_invite => sub { 
         my $exercise = shift; 
         my $here = $c->req->uri;
@@ -79,7 +91,17 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
 ## Exercise submission
 sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
     my ($self, $c) = @_;
+    
+    my $exercise = $c->req->param('exercise');
+    if(!exists $c->stash->{exercises}{$exercise}) {
+        die "No such exercise $exercise in chapter " . $c->stash->{config}{chapter};
+    }
 
+    if(!$c->user_exists) {
+        die "Shouldn't be able to get here with no user? (session expired?)";
+    }
+
+    my $results = $c->model('CodeBuilder')->compile_project();
 }
 
 sub chapter_index :Chained('chapter') :PathPart('') :Args(0) {

@@ -11,6 +11,9 @@
 ** TODO Docs in module code, do we set AUTHOR / etc for the user?
  
 *** TODO Ch1 - setup of dbic schema files
+** TODO When to create the user's coding environment?
+** TODO How to set/change perms on the coding env (to 'progtorial')
+** TODO Need sudo to run mknod!
 * Setup
 ** TODO Install perlbrew'd 5.10.1 / 5.12.x in a clean location
    CLOCK: [2010-09-18 Sat 15:02]--[2010-09-18 Sat 15:08] =>  0:06
