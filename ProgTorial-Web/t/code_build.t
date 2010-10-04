@@ -52,6 +52,8 @@ ok($cb->compile_project(), 'Compiled project without errors');
 ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile'), 'Project makefile exists after compiling');
 ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/blib/lib/MyBlog/Schema.pm'), '.pm file copied to blib after compiling');
 
+ok($cb->run_test('t/00-load.t'), 'Ran load test');
+
 ## Update/add code from user input:
 ok($cb->update_or_add_file({
     filename => 'lib/MyBlog/Schema/Result/Post.pm',
