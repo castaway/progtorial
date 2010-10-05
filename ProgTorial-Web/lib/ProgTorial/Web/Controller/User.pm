@@ -41,13 +41,14 @@ sub auth_user : Local Does('NeedsLogin') {
 sub user_base :Chained('not_required') :PathPart('users') :CaptureArgs(0) {
 }
 
-sub register :Chained('user_base') :PathPart('register') :Args(0) {
+sub register_or_login :Chained('user_base') :PathPart('login') :Args(0) {
     my ($self, $c) = @_;
 
     my $form = ProgTorial::Form::Register->new();
     if($c->req->param()) {
-        $form->process($c->req->params);
-        if($form->validated) {
+        $form->process(ctx => $c, params => $c->req->params);
+        ## Register, else authenticated by validate()
+        if($form->validated && $form->field('is_register')->value) {
             my $user_rs = $c->model('Database::User');
             $user_rs->create( { 
                ( map { $user_rs->result_source->has_column($_) ? ($_, $c->req->param($_)) : () }

@@ -51,7 +51,7 @@ sub navigation : Private {
     my ($self, $c) = @_;
 
     $c->stash('navigation' => [
-                  { url => $c->uri_for('/login'), name => 'Login' },
+                  { url => $c->uri_for('/user/login'), name => 'Login' },
                   { url => $c->uri_for('/logout'), name => 'Logout' },
                   { url => $c->uri_for('/tutorials'), name => 'Tutorials' },
               ],
