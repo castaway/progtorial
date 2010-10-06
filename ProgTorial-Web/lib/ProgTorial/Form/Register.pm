@@ -15,6 +15,10 @@ has_field 'username' => ( type => 'Text', label => 'username', required => 1,
 has_field 'password' => ( type => 'Password', label => 'password',
                           required => 1, required_message => 'Please enter a password',
     );
+has_field 'remember' => ( type => 'Checkbox',
+                          css_class => 'login_field',
+                          label => 'Remember me'
+    );
 has_field 'is_register' => ( type => 'Checkbox', 
                              css_class => 'register_switch',
                              label => 'Register new user');
@@ -22,13 +26,13 @@ has_field 'is_register' => ( type => 'Checkbox',
 has_field 'password2' => ( type => 'Password', 
                            css_class => 'register_field',
                            label => 'password (again)',
-                           required => 1, 
+#                           required => 1, 
                            required_message => 'Please enter a password',
     );
 has_field 'email' => ( type => 'Email', 
                        css_class => 'register_field',
                        label => 'email', 
-                       required => 1,
+#                       required => 1,
                        required_message => 'Please enter your email address',
     );
 
@@ -39,7 +43,8 @@ has_field 'register' => ( type => 'Submit',
 
 has '+dependency' => ( default => sub {
     [
-     [ 'password', 'password2'],
+     ## If one of these has a value, all are required -> register, not login
+     [ 'password_2', 'email', 'is_register'],
     ]
                        }
     );

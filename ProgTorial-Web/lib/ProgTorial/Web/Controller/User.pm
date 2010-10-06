@@ -46,15 +46,22 @@ sub register_or_login :Chained('user_base') :PathPart('login') :Args(0) {
 
     my $form = ProgTorial::Form::Register->new();
     if($c->req->param()) {
-        $form->process(ctx => $c, params => $c->req->params);
+        $form->process(ctx => $c, params => $c->req->params, verbose => 1 );
         ## Register, else authenticated by validate()
-        if($form->validated && $form->field('is_register')->value) {
-            my $user_rs = $c->model('Database::User');
-            $user_rs->create( { 
-               ( map { $user_rs->result_source->has_column($_) ? ($_, $c->req->param($_)) : () }
-                keys %{ $c->req->params}),
-               displayname => $c->req->param('username')});
-            $c->res->redirect($c->uri_for('/'));
+        if($form->validated) {
+            if($form->field('is_register')->value) {
+                my $user_rs = $c->model('Database::User');
+                $user_rs->create( { 
+                    ( map { $user_rs->result_source->has_column($_) ? ($_, $c->req->param($_)) : () }
+                      keys %{ $c->req->params}),
+                    displayname => $c->req->param('username')});
+                # $c->res->redirect($c->uri_for('/'));
+            }
+
+            $c->res->redirect($c->session->{redirect_to_after_login});
+            $c->extend_session_expires(999999999999)
+                if $form->field( 'remember' )->value;
+
         }
     }
 

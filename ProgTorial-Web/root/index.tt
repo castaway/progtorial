@@ -1,1 +1,1 @@
-<a href="[% c.uri_for('/users/register') %]">Login | Register</a>
+<a href="[% c.uri_for('/users/login') %]">Login | Register</a>

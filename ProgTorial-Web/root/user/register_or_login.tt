@@ -8,10 +8,12 @@
   jQuery('.register_switch :checkbox').change( function() {
     if(jQuery(this).attr('checked')) {
         jQuery('.register_field').show();
+        jQuery('.login_field').hide();
         jQuery(':submit').attr('value', 'Register');
         return true;
     } else {
        jQuery('.register_field').hide();
+       jQuery('.login_field').show();
        jQuery(':submit').attr('value', 'Login');
         return true;
     }
