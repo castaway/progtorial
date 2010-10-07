@@ -27,40 +27,53 @@
 ** DONE Setup webframework to build the dbic tutorial application in
 *** DONE Install catalyst (in its own perlbrew/locallib?)
     CLOCK: [2010-09-18 Sat 17:43]--[2010-09-18 Sat 19:09] =>  1:26
-*** TODO Set up authentication (CatalystX::Login?)
+*** DONE Set up authentication (CatalystX::Login?)
     CLOCK: [2010-09-18 Sat 21:06]--[2010-09-18 Sat 23:00] =>  1:54
 ** TODO Compiling / testing user code
-*** TODO Figure out how to run all these chrooted
+*** DONE Figure out how to run all these chrooted
 *** TODO Compile user code, report results
 *** TODO Run user code against applicable test suite / file, report results
 *** TODO Output test cover results to somewhere the application can display them
+** TODO User profile maint/management
+*** TODO Password reminder/reset
+*** TODO Change my password
+*** TODO Edit account details/email etc
+*** TODO View my exercises/tutorials/tarballs
+*** TODO Download my tarballs
 * Front-end
 ** DONE Setup single chapter page (Markdown / TT)
    CLOCK: [2010-09-19 Sun 19:14]--[2010-09-19 Sun 20:05] =>  0:51
    CLOCK: [2010-09-19 Sun 17:31]--[2010-09-19 Sun 17:53] =>  0:22
    CLOCK: [2010-09-19 Sun 16:42]--[2010-09-19 Sun 17:09] =>  0:27
-** TODO Make chapter page interactive if user logged in
+** DONE Make chapter page interactive if user logged in
 *** DONE Show appropriate exercise form when user logged in
    CLOCK: [2010-09-26 Sun 14:16]--[2010-09-26 Sun 17:49] =>  3:33
    CLOCK: [2010-09-20 Mon 08:35]--[2010-09-20 Mon 09:05] =>  0:30
-*** TODO Set exercise hidden field on exercise form
-*** TODO 'Validate' exercise form
+*** DONE Set exercise hidden field on exercise form
+*** DONE 'Validate' exercise form
 ** TODO Setup tutorial pages layout, use html links to start/next/previous/contents etc
 ** DONE Setup minimal navigation  (to all pages from any)
 ** DONE Create initial tutorial page to add interactivity to
+** TODO Show/implement login/register forms inline? 
+** TODO Add "tutorials" section + pages
+** TODO Port rest of DBIC tutorial
 * Features
 ** Download tarball of your current solution
 ** Download tarball of site solution
+** Show exercise in separate window/tab/split screen?
+** Show chapter on separate pages, instead of big scrolly chapter?
 ** POD support, using =begin exercise, or just TT inserts ?
 ** Developers area
 ** Upload tutorials
 ** Beta / review new tutorials
 ** Ratings
 ** Reccomentations / friends
+** Points / comparison system
 ** % tutorial done/completed
 ** "Skip ahead" feature
 ** Instructions on how to set up your own coding env, download tarball etc
 * Tutorials
+** DBIC
 ** Perl intro  (based on modern perl book?)
 ** Moose
 ** Catalyst
