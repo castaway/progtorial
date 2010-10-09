@@ -35,16 +35,16 @@ sub create_environment_directory {
        '/dev/null',
        '/dev/urandom',
        (map {which($_)} qw<echo ls cat test [ sh which chmod chown touch true false cp>),
-       pm_file('Config')->parent->file('Config_heavy.pl'),
-       pm_file('Config')->parent->file('Config_git.pl'),
+       $self->pm_file('Config')->parent->file('Config_heavy.pl'),
+       $self->pm_file('Config')->parent->file('Config_git.pl'),
        # The core header files, required by MakeMaker even for non-XS modules.
-       pm_file('Config')->parent->subdir('CORE'),
+       $self->pm_file('Config')->parent->subdir('CORE'),
        # Required for running tests.
-       pm_file('JSON::Any'),
-       pm_file('JSON::XS'),
-       pm_file('common::sense'),
+       $self->pm_file('JSON::Any'),
+       $self->pm_file('JSON::XS'),
+       $self->pm_file('common::sense'),
 
-       (map {pm_file($_)}
+       (map {$self->pm_file($_)}
         grep {!($_ ~~ ['Time::Piece::Seconds', 'XS::APItest', 'DCLsym', 'Unicode', 'CGI::Fast', qr/Win32/])}
         keys %{$Module::CoreList::version{$]}}
        )) {
@@ -98,7 +98,8 @@ if (@ARGV) {
   @tests = glob('t/*.t');
 }
 
-my $harness = TAP::Harness->new({verbosity => -3});
+my $harness = TAP::Harness->new({verbosity => 2, 
+                                 lib  => [ 'blib/lib', 'blib/arch' ],});
 my $aggregator = $harness->runtests(@tests);
 my $json = JSON::Any->objToJson($aggregator);
 open my $outfh, ">", 'tests.json' or die "Couldn't open tests.json: $!";
@@ -226,11 +227,12 @@ sub insert_hardlink {
   }
 }
 
-# sub, not method
 # NB: You can call Path::Class methods on the result only for modules with no "auto" bits, and
 # it will give poor error messages if it fails.
 sub pm_file {
-  my ($classname) = @_;
+  my ($self, $classname) = @_;
+  # $self is unused.
+
   if ($classname !~ m/\.pl$/) {
     $classname =~ s!::!/!g;
     $classname .= ".pm";
