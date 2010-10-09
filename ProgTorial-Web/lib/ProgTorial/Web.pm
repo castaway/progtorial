@@ -45,6 +45,7 @@ __PACKAGE__->config(
         WRAPPER => 'wrapper.tt',
     },
     ## should be in conf file.
+    'tutorial_path' => ProgTorial::Web->path_to('tutorials'),
     'Controller::Chapter' => {
         pages_path => ProgTorial::Web->path_to('pages'),
     },

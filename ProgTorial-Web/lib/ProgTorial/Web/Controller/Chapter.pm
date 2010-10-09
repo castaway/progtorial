@@ -27,7 +27,7 @@ Catalyst Controller.
 
 =cut
 
-sub base :Chained('/') :PathPart('chapter') :CaptureArgs(0) {
+sub base :Chained('/tutorial/tutorial') :PathPart('chapter') :CaptureArgs(0) {
     my ($self, $c) = @_;
 
     $c->forward('/navigation');
@@ -39,7 +39,7 @@ sub base :Chained('/') :PathPart('chapter') :CaptureArgs(0) {
                                   ),
                                   name => $_->{chapter} }
     }
-    (sort { $a->{order} <=> $b->{order} } $self->get_chapter_configs);
+    (sort { $a->{order} <=> $b->{order} } $self->get_chapter_configs($c->stash->{tutorial}));
 
     push @{$c->stash->{navigation}}, @chapter_nav;
 }
@@ -49,7 +49,8 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
     my ($self, $c, $chapter) = @_;
 
     ## <chapter>.md
-    my $chapter_file = $self->find_chapter($chapter);
+    $c->log->_dump($c->stash);
+    my $chapter_file = $self->find_chapter($c->stash->{tutorial}, $chapter);
     
     ## Catch random rubbish in url and send back to start.
     if($chapter_file) {
@@ -120,22 +121,21 @@ sub chapter_index :Chained('chapter') :PathPart('') :Args(0) {
 # }
 
 sub get_chapter_configs {
-    my ($self) = @_;
+    my ($self, $pdir) = @_;
 
-    my $pdir = $self->pages_path;
     my @chapters = grep { $_->basename =~ /\.md$/ } $pdir->children;
 
     return map { $self->find_config($_) } @chapters;
 }
 
 sub find_chapter {
-    my ($self, $chapter) = @_;
+    my ($self, $tutorial, $chapter) = @_;
 
-    my $pdir = $self->pages_path;
-    if(!-d "$pdir") {
-        die "Chapter path $pdir not found, configuration error?";
+#    my $pdir = $self->pages_path;
+    if(!-d "$tutorial") {
+        die "Chapter path $tutorial not found, configuration error?";
     }
-    my $chapter_file = $pdir->file(lc "$chapter.md");
+    my $chapter_file = $tutorial->file(lc "$chapter.md");
     if(!-e "$chapter_file") {
         print STDERR "User asked for missing chapter file $chapter_file";
         return undef;

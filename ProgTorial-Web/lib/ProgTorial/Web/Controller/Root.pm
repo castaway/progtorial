@@ -47,12 +47,18 @@ sub default :Path {
     $c->response->status(404);
 }
 
+## Should store these in a hash/ref, condition/uri, args, name?
 sub navigation : Private {
     my ($self, $c) = @_;
 
     $c->stash('navigation' => [
-                  { url => $c->uri_for('/users/login'), name => 'Login' },
-                  { url => $c->uri_for('/logout'), name => 'Logout' },
+                  (!$c->user_exists ? (
+                        { url => $c->uri_for('/user/login'), name => 'Login' },
+                   ) : () ),
+                  ($c->user_exists ? (
+                       { url => $c->uri_for('/logout'), name => 'Logout' },
+                       { url => $c->uri_for($c->controller('User')->action_for('view_profile'), [ $c->user->username ]), name => 'Your page' },
+                       ) : ()),
                   { url => $c->uri_for('/tutorials'), name => 'Tutorials' },
               ],
         current_page => $c->req->uri,
