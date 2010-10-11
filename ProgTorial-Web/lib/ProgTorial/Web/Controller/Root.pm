@@ -53,7 +53,7 @@ sub navigation : Private {
 
     $c->stash('navigation' => [
                   (!$c->user_exists ? (
-                        { url => $c->uri_for('/user/login'), name => 'Login' },
+                        { url => $c->uri_for('/users/login'), name => 'Login' },
                    ) : () ),
                   ($c->user_exists ? (
                        { url => $c->uri_for('/logout'), name => 'Logout' },

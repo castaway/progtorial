@@ -1,0 +1,8 @@
+<h2>Your data</h2>
+
+[%# Can we use the edit form in some sort of "display/click to edit" mode here? %]
+<a name="edit_profile">Edit profile</a>
+<div class="user_data">
+ <div class="field">Username: [% c.user.username %]</div>
+ <div class="field">Email: [% c.user.email %]</div>
+</div>

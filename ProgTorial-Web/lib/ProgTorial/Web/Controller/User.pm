@@ -30,10 +30,7 @@ sub index :Path :Args(0) {
     $c->response->body('Matched ProgTorial::Web::Controller::User in User.');
 }
 
-## ??
-sub auth_user : Local Does('NeedsLogin') {
-    my ( $self, $c ) = @_;
-    $c->res->body('<h2>Hello, user!</h2>');
+sub user_base :Chained('not_required') :PathPart('users') :CaptureArgs(0) {
 }
 
 sub view_profile :Chained('required') :PathPart('profile') :Args(1) {
@@ -60,7 +57,7 @@ sub login_redirect {
     $ctx->detach;
 }
 
-sub register_or_login :Chained('not_required') :PathPart('login') :Args(0) {
+sub register_or_login :Chained('user_base') :PathPart('login') :Args(0) {
     my ($self, $c) = @_;
 
     my $form = ProgTorial::Form::Register->new();
