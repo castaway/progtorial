@@ -44,16 +44,28 @@ sub create_environment_directory {
        $self->pm_file('JSON::Any'),
        $self->pm_file('JSON::XS'),
        $self->pm_file('common::sense'),
-
+       $self->pm_file('TAP::Parser'),
+       $self->pm_file('TAP::Parser')->parent,
+       $self->pm_file('TAP::Parser::SourceHandler::Executable')->parent->parent->parent,
+       $self->pm_file('TAP::Parser::SourceHandler::Executable'),
+       $self->pm_file('TAP::Parser::SourceHandler'),
+       $self->pm_file('TAP::Parser::SourceHandler::Perl'),
+       $self->pm_file('TAP::Parser::SourceHandler::File'),
+       $self->pm_file('TAP::Parser::SourceHandler::RawTAP'),
+       $self->pm_file('TAP::Parser::SourceHandler::Handle'),
+       $self->pm_file('B::Utils'),
+       $self->pm_file('Data::Dump::Streamer'),
+       $self->pm_file('Data::Dump::Streamer')->parent->subdir('Streamer'),
+       
        (map {$self->pm_file($_)}
         grep {!($_ ~~ ['Time::Piece::Seconds', 'XS::APItest', 'DCLsym', 'Unicode', 'CGI::Fast', qr/Win32/])}
-        keys %{$Module::CoreList::version{$]}}
+        sort keys %{$Module::CoreList::version{$]}}
        )) {
     $self->insert_hardlink($_);
   }
   $self->extract_archive($self->projects_dir->file($self->project.'-0.01.tar.gz'));
 
-  my $chown = 'chmod -R 777 ' . $self->environment_directory;
+  my $chown = 'chmod -R 777 ' . $self->environment_directory->subdir($self->project.'-0.01');
   `$chown`;
 
 }
@@ -91,10 +103,13 @@ sub run_test {
       ->file('runtests.pl');
   print $outfh <<'END_RUNTESTS';
 #!/usr/bin/perl
+#line 98 CodeBuilder.pm
 use warnings;
 use strict;
 use TAP::Harness;
+use TAP::Parser;
 use JSON::Any;
+use Data::Dump::Streamer 'Dump', 'Dumper';
 
 my @tests;
 if (@ARGV) {
@@ -104,16 +119,19 @@ if (@ARGV) {
 }
 
 ## Random obscure verbose test setting:
-$ENV{TEST_VCERBOSE} = 1;
+$ENV{TEST_VERBOSE} = 1;
 
 ## Remove the output file before running tests, so bailing doesn't use the old one
 if (-e "tests.json") {
   unlink "tests.json" or die("Can't remove tests.json $!");
 }
 
-my $harness = TAP::Harness->new({verbosity => 2, 
+my $formatter = MyFormatter->new;
+
+my $harness = TAP::Harness->new({
                                  lib  => [ 'blib/lib', 'blib/arch' ],
-                                 formatter_class => 'TAP::Formatter::File'});
+                                 formatter => $formatter
+                                });
 my $aggregator = $harness->runtests(@tests);
 # Docs for JSON::XS are terribly unclear.
 # allow_blessed   convert_blessed   effect
@@ -124,20 +142,88 @@ my $aggregator = $harness->runtests(@tests);
 
 
 #  
-my $jsonifier = JSON::Any->new(allow_blessed => 1,
+my $jsonifier = JSON::Any->new(allow_blessed => 0,
                                convert_blessed => 1,
                                allow_nonref => 1);
 
-$harness->summary($aggregator);
-my $out = {};
-$out->{status} = $aggregator->get_status;
-for (qw<failed parse_errors passed planned skipped todo todo_passed wait exit>) {
-  $out->{$_} = [$aggregator->$_()];
-}
-my $json = $jsonifier->objToJson($out);
-open my $outfh, ">", 'tests.json' or die "Couldn't open tests.json: $!";
+
+my $outfh;
+
+my $dds = Dumper($formatter);
+open $outfh, ">", 'tests.dds' or die "Couldn't open tests.dds: $!";
+print $outfh $dds or die "Can't print to dds file: $!";
+close $outfh or die "Can't close tests.dds: $!";
+
+my $json = $jsonifier->objToJson($formatter);
+open $outfh, ">", 'tests.json' or die "Couldn't open tests.json: $!";
 print $outfh $json or die("Can't print to json file $!");
 close $outfh or die("Can't close fh, $!");
+
+package MyFormatter;
+use warnings;
+use strict;
+use parent 'TAP::Formatter::Base';
+
+sub open_test {
+  my ($self, $filename, $parser) = @_;
+  print "MyFormatter: open_test filename=$filename, parser=$parser\n";
+
+  # This is supposed to return a "session", which "result" can then be called on.
+  $self->{current_filename} = $filename;
+
+  return $self;
+}
+
+sub close_test {
+  my ($self) = @_;
+
+  $self->{current_filename} = undef;
+
+  return $self;
+}
+
+sub result {
+  my ($self, $result) = @_;
+
+  # result is a TAP::Parser::Result::Test
+
+  if ($result->isa('TAP::Parser::Result::Plan')) {
+    # Plans?  We don't need no steenkin plans.
+    return;
+  }
+
+  my $my_result = {
+                   number => $result->number,
+                   description => $result->description,
+                   directive => $result->directive, # undef, TODO, or SKIP.
+                   explanation => $result->explanation, # if directive is TODO or SKIP, why it was TODONE or SKIPped.
+                   is_ok => $result->is_ok
+                  };
+                   
+
+  push @{$self->{results}{$self->{current_filename}}{results}}, $my_result;
+
+}
+
+sub TO_JSON {
+  my ($self) = @_;
+
+  my $copy = {%$self};
+  delete $copy->{stdout};
+
+  return $copy;
+}
+
+#sub DESTROY {
+#}
+
+#sub AUTOLOAD {
+#  our $AUTOLOAD;
+#  die "MyFormatter::AUTOLOAD: $AUTOLOAD(@_)";
+#}
+
+1;
+
 END_RUNTESTS
   
   $self->run_in_child('cd '.$self->project.'-0.01; perl -Ilib runtests.pl '.join(' ', @testnames));
@@ -170,7 +256,7 @@ sub insert_hardlink {
 
 
   my $orig_src = $src;
-  #print "insert_hardlink($src)\n";
+  # print "insert_hardlink($src)\n";
   # We want to keep ".." from showing up, but we don't want to get the "real" name of symlinks.
   $src =~ s![^/]+/\.\./!/!;
   #print " ... manual fuckery -> $src\n" if $src ne $orig_src;
@@ -189,7 +275,7 @@ sub insert_hardlink {
   } elsif (-d $src) {
     $src = Path::Class::Dir->new($src);
     Path::Class::Dir->new($dest)->mkpath;
-    $self->insert_hardlink($_) for $src->children;
+    $self->insert_hardlink($_) for sort $src->children;
   } elsif (-c $src) {
     my @args = ('sudo',
                 'mknod',
@@ -226,8 +312,10 @@ sub insert_hardlink {
         $magic = 'Perl5 module source text';
       } elsif ($src =~ m/\.so$/) {
         $magic = 'ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.18, stripped';
+      } elsif ($src =~ m/\.h$/) {
+        $magic = 'ASCII C program text';
       } else {
-        # warn "Getting magic for $src";
+        warn "Getting magic for $src";
         
         $magic = `file $src`;
         chomp $magic;
@@ -278,7 +366,7 @@ sub pm_file {
       # Used by autosplit and XS modules.
       my $autoname = "$_/auto/$classname";
       $autoname =~ s/\.pm$//;
-      if (-e $autoname) {
+      if (-e $autoname and wantarray) {
         return ($filename, $autoname);
       }
       return Path::Class::File->new($filename);
