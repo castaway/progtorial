@@ -72,6 +72,8 @@
 ** % tutorial done/completed
 ** "Skip ahead" feature
 ** Instructions on how to set up your own coding env, download tarball etc
+** Display somewhere/somehow the currently installed/available modules on the system?
+** Allow requests for new modules to env..   
 * Tutorials
 ** DBIC
 ** Perl intro  (based on modern perl book?)
@@ -79,5 +81,7 @@
 ** Catalyst
 ** Template toolkit
 ** FormHandler
+** Catalyst - AutoCRUD
+** Catalyst - SimpleLogin
 
  

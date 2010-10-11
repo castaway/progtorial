@@ -1,3 +1,4 @@
+# -*- mode: cperl -*-
 package Safe::CodeBuilder;
 use Moose;
 use MooseX::StrictConstructor;
@@ -51,6 +52,10 @@ sub create_environment_directory {
     $self->insert_hardlink($_);
   }
   $self->extract_archive($self->projects_dir->file($self->project.'-0.01.tar.gz'));
+
+  my $chown = 'chmod -R 777 ' . $self->environment_directory;
+  `$chown`;
+
 }
 
 sub run_in_child {
@@ -98,16 +103,45 @@ if (@ARGV) {
   @tests = glob('t/*.t');
 }
 
+## Random obscure verbose test setting:
+$ENV{TEST_VCERBOSE} = 1;
+
+## Remove the output file before running tests, so bailing doesn't use the old one
+if (-e "tests.json") {
+  unlink "tests.json" or die("Can't remove tests.json $!");
+}
+
 my $harness = TAP::Harness->new({verbosity => 2, 
-                                 lib  => [ 'blib/lib', 'blib/arch' ],});
+                                 lib  => [ 'blib/lib', 'blib/arch' ],
+                                 formatter_class => 'TAP::Formatter::File'});
 my $aggregator = $harness->runtests(@tests);
-my $json = JSON::Any->objToJson($aggregator);
+# Docs for JSON::XS are terribly unclear.
+# allow_blessed   convert_blessed   effect
+#             0                 0   encountered object 'TAP::Parser::Aggregator=HASH(0x834cd58)', but neither allow_blessed nor convert_blessed settings are enabled
+#             0                 1   encountered object 'TAP::Parser::Aggregator=HASH(0x834cd88)', but neither allow_blessed enabled nor TO_JSON method available
+#             1                 0   null
+#             1                 1   null
+
+
+#  
+my $jsonifier = JSON::Any->new(allow_blessed => 1,
+                               convert_blessed => 1,
+                               allow_nonref => 1);
+
+$harness->summary($aggregator);
+my $out = {};
+$out->{status} = $aggregator->get_status;
+for (qw<failed parse_errors passed planned skipped todo todo_passed wait exit>) {
+  $out->{$_} = [$aggregator->$_()];
+}
+my $json = $jsonifier->objToJson($out);
 open my $outfh, ">", 'tests.json' or die "Couldn't open tests.json: $!";
-print $outfh $json;
+print $outfh $json or die("Can't print to json file $!");
+close $outfh or die("Can't close fh, $!");
 END_RUNTESTS
   
   $self->run_in_child('cd '.$self->project.'-0.01; perl -Ilib runtests.pl '.join(' ', @testnames));
-
+  
   my $json = do {local(@ARGV, $/) = $self->environment_directory->subdir($self->project.'-0.01')->file('tests.json'); <>};
   JSON::Any->jsonToObj($json);
 }

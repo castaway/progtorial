@@ -54,8 +54,8 @@ for (qw<Carp::Clan Try::Tiny namespace::clean Sub::Name>) {
 
 ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile.PL'), 'Unpacked tarball there');
 
-my $chown = 'chmod -R 777 ' . $cb->environment_directory;
-`$chown`;
+#my $chown = 'chmod -R 777 ' . $cb->environment_directory;
+#`$chown`;
 
 ## Make/Test compiled with empty enc, should pass:
 ok(!-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile'), 'Project makefile doesn\'t exist yet');
