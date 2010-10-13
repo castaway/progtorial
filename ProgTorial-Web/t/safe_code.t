@@ -16,6 +16,13 @@ my $cb = Safe::CodeBuilder->new({
                                  project => 'Safe-Test',
                                  projects_dir => Path::Class::Dir->new('t/projects'),
                                  environments_dir => Path::Class::Dir->new('t/environments'),
+                                 ## Debugging, ON
+                                 debug => 1,
+                                 ## max size of memory code can use (bytes)
+                                 max_memory => 20_000,
+                                 ## Max diskspace entire env can use
+                                 max_disk_space => 100_000,
+
                                 });
 
 $cb->create_environment_directory();
@@ -35,6 +42,17 @@ $ret = $cb->run_test('t/bail.t');
 ok(1, 'Survived a bail test');
 diag(Dumper(['bail test', $ret]));
 
+dies_ok(sub { $cb->update_or_add_file({
+    filename => 'BIGFILETEST.txt',
+    content => ('a' x 100_000),
+}) }, 'dies when asked to store file larger than allowed disk space');
+
+$cb->update_or_add_file({
+                         filename => 'Makefile.PL',
+                         content => << 'BIGFILE',
+my @foo = ('a' x 20_000);
+BIGFILE
+});
 
 
 done_testing;
