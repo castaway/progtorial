@@ -49,7 +49,11 @@ ok(-d $cb->environment_directory, 'Created coding environment');
 
 #$cb->insert_hardlink($cb->pm_file('DBIx::Class'));
 #$cb->insert_hardlink($_) for $cb->pm_file('DBIx::Class')->parent->subdir('Class');
-$cb->insert_hardlink($_) for grep {$_ !~ /progtorial/ && -e} @INC;
+for (grep {$_ =~ /perlbrew/ && -e} @INC) {
+    print STDERR "Adding INC $_\n";
+    $cb->insert_hardlink($_);
+}
+
 #$cb->insert_hardlink($_) for $cb->pm_file('Config')->parent;
 #$cb->insert_hardlink($_) for $cb->pm_file('Carp::Clan')->parent->subdir('Clan');
 # for (qw<Carp::Clan Try::Tiny namespace::clean Sub::Name>) {

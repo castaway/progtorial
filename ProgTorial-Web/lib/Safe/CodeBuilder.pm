@@ -44,18 +44,18 @@ sub create_environment_directory {
        $self->pm_file('JSON::Any'),
        $self->pm_file('JSON::XS'),
        $self->pm_file('common::sense'),
-       $self->pm_file('TAP::Parser'),
-       $self->pm_file('TAP::Parser')->parent,
-       $self->pm_file('TAP::Parser::SourceHandler::Executable')->parent->parent->parent,
-       $self->pm_file('TAP::Parser::SourceHandler::Executable'),
-       $self->pm_file('TAP::Parser::SourceHandler'),
-       $self->pm_file('TAP::Parser::SourceHandler::Perl'),
-       $self->pm_file('TAP::Parser::SourceHandler::File'),
-       $self->pm_file('TAP::Parser::SourceHandler::RawTAP'),
-       $self->pm_file('TAP::Parser::SourceHandler::Handle'),
-       $self->pm_file('B::Utils'),
-       $self->pm_file('Data::Dump::Streamer'),
-       $self->pm_file('Data::Dump::Streamer')->parent->subdir('Streamer'),
+#       $self->pm_file('TAP::Parser'),
+#       $self->pm_file('TAP::Parser')->parent,
+#       $self->pm_file('TAP::Parser::SourceHandler::Executable')->parent->parent->parent,
+#       $self->pm_file('TAP::Parser::SourceHandler::Executable'),
+#       $self->pm_file('TAP::Parser::SourceHandler'),
+#       $self->pm_file('TAP::Parser::SourceHandler::Perl'),
+#       $self->pm_file('TAP::Parser::SourceHandler::File'),
+#       $self->pm_file('TAP::Parser::SourceHandler::RawTAP'),
+#       $self->pm_file('TAP::Parser::SourceHandler::Handle'),
+#       $self->pm_file('B::Utils'),
+#        $self->pm_file('Data::Dump::Streamer'),
+#        $self->pm_file('Data::Dump::Streamer')->parent->subdir('Streamer'),
        
        (map {$self->pm_file($_)}
         grep {!($_ ~~ ['Time::Piece::Seconds', 'XS::APItest', 'DCLsym', 'Unicode', 'CGI::Fast', qr/Win32/])}
@@ -110,7 +110,7 @@ use strict;
 use TAP::Harness;
 use TAP::Parser;
 use JSON::Any;
-use Data::Dump::Streamer 'Dump', 'Dumper';
+#use Data::Dump::Streamer 'Dump', 'Dumper';
 
 my @tests;
 if (@ARGV) {
@@ -150,10 +150,10 @@ my $jsonifier = JSON::Any->new(allow_blessed => 0,
 
 my $outfh;
 
-my $dds = Dumper($formatter);
-open $outfh, ">", 'tests.dds' or die "Couldn't open tests.dds: $!";
-print $outfh $dds or die "Can't print to dds file: $!";
-close $outfh or die "Can't close tests.dds: $!";
+#my $dds = Dumper($formatter);
+#open $outfh, ">", 'tests.dds' or die "Couldn't open tests.dds: $!";
+#print $outfh $dds or die "Can't print to dds file: $!";
+#close $outfh or die "Can't close tests.dds: $!";
 
 my $json = $jsonifier->objToJson($formatter);
 open $outfh, ">", 'tests.json' or die "Couldn't open tests.json: $!";
@@ -257,7 +257,7 @@ sub insert_hardlink {
 
 
   my $orig_src = $src;
-  # print "insert_hardlink($src)\n";
+#  print "insert_hardlink($src)\n";
   # We want to keep ".." from showing up, but we don't want to get the "real" name of symlinks.
   $src =~ s![^/]+/\.\./!/!;
   #print " ... manual fuckery -> $src\n" if $src ne $orig_src;
@@ -266,8 +266,7 @@ sub insert_hardlink {
   $src = Path::Class::File->new($src)->cleanup;
   
   my $dest = Path::Class::File->new($self->environment_directory, "$src");
-  return if -e $dest;
-  # print "$src -> $dest\n";
+#  print "$src -> $dest\n";
   
   $dest->parent->mkpath;
   
@@ -277,6 +276,10 @@ sub insert_hardlink {
     $src = Path::Class::Dir->new($src);
     Path::Class::Dir->new($dest)->mkpath;
     $self->insert_hardlink($_) for sort $src->children;
+  } elsif(-e $dest) {
+    ## Don't bother if we already have this, but do AFTER recursion
+    ## cos the directory might partly exist already
+    return;
   } elsif (-c $src) {
     my @args = ('sudo',
                 'mknod',
@@ -311,12 +314,14 @@ sub insert_hardlink {
       my $magic;
       if ($src =~ m/\.(?:ix|al|pm)$/) {
         $magic = 'Perl5 module source text';
+      } elsif ($src =~ m{\.packlist}) {
+        $magic = 'ASCII text';
       } elsif ($src =~ m/\.so$/) {
         $magic = 'ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.18, stripped';
       } elsif ($src =~ m/\.h$/) {
         $magic = 'ASCII C program text';
       } else {
-        warn "Getting magic for $src";
+#        warn "Getting magic for $src";
         
         $magic = `file $src`;
         chomp $magic;
