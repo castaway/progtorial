@@ -83,5 +83,5 @@
 ** FormHandler
 ** Catalyst - AutoCRUD
 ** Catalyst - SimpleLogin
-
+** DBIC components
  

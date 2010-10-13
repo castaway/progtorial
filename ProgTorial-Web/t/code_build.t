@@ -43,14 +43,18 @@ ok(-d $cb->environment_directory, 'Created coding environment');
 # ok(-e $cb->environment_directory->file('usr/share/perl/5.10/strict.pm'), 'Copied strict.pm');
 
 ## install dbic / deps
-$cb->insert_hardlink($cb->pm_file('DBIx::Class'));
-$cb->insert_hardlink($cb->pm_file('DBIx::Class')->parent->subdir('Class'));
-$cb->insert_hardlink($_) for grep {-e} @INC;
-$cb->insert_hardlink($cb->pm_file('Config')->parent);
-$cb->insert_hardlink($cb->pm_file('Carp::Clan')->parent->parent);
-for (qw<Carp::Clan Try::Tiny namespace::clean Sub::Name>) {
-    $cb->insert_hardlink($cb->pm_file($_));
-}
+#foreach my $thingy (qw/DBIx::Class Carp::Clan Try::Tiny namespace::clean Sub::Name/) {
+#    $cb->insert_hardlink($_) for $cb->pm_file($thingy);
+#}
+
+#$cb->insert_hardlink($cb->pm_file('DBIx::Class'));
+#$cb->insert_hardlink($_) for $cb->pm_file('DBIx::Class')->parent->subdir('Class');
+$cb->insert_hardlink($_) for grep {$_ !~ /progtorial/ && -e} @INC;
+#$cb->insert_hardlink($_) for $cb->pm_file('Config')->parent;
+#$cb->insert_hardlink($_) for $cb->pm_file('Carp::Clan')->parent->subdir('Clan');
+# for (qw<Carp::Clan Try::Tiny namespace::clean Sub::Name>) {
+#     $cb->insert_hardlink($cb->pm_file($_));
+# }
 
 ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile.PL'), 'Unpacked tarball there');
 

@@ -23,7 +23,7 @@ $cb->create_environment_directory();
 
 ok($cb->compile_project(), 'Compiled project without errors');
 my $ret;
-$ret = $cb->run_test('t/ok.t');
+$ret = $cb->run_test('t/2ok.t');
 ok(1, 'Survived an OK test');
 diag(Dumper(['ok test', $ret]));
      

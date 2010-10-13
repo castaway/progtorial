@@ -30,7 +30,7 @@ sub create_environment_directory {
   return 1 if(-d $dest);
   $dest->mkpath;
   
-  for (which('perl'),
+  for my $thingy (which('perl'),
        '/bin/bash',
        '/usr/bin/make',
        '/dev/null',
@@ -49,7 +49,8 @@ sub create_environment_directory {
         grep {!($_ ~~ ['Time::Piece::Seconds', 'XS::APItest', 'DCLsym', 'Unicode', 'CGI::Fast', qr/Win32/])}
         keys %{$Module::CoreList::version{$]}}
        )) {
-    $self->insert_hardlink($_);
+#      print "Trying to link: $thingy\n";
+      $self->insert_hardlink($thingy);
   }
   $self->extract_archive($self->projects_dir->file($self->project.'-0.01.tar.gz'));
 
@@ -103,8 +104,8 @@ if (@ARGV) {
   @tests = glob('t/*.t');
 }
 
-## Random obscure verbose test setting:
-$ENV{TEST_VCERBOSE} = 1;
+## For debugging missing compiled libs
+# $ENV{PERL_DL_DEBUG} = 1;
 
 ## Remove the output file before running tests, so bailing doesn't use the old one
 if (-e "tests.json") {
@@ -170,7 +171,7 @@ sub insert_hardlink {
 
 
   my $orig_src = $src;
-  #print "insert_hardlink($src)\n";
+  # print "insert_hardlink($src)\n";
   # We want to keep ".." from showing up, but we don't want to get the "real" name of symlinks.
   $src =~ s![^/]+/\.\./!/!;
   #print " ... manual fuckery -> $src\n" if $src ne $orig_src;
@@ -184,9 +185,9 @@ sub insert_hardlink {
   
   $dest->parent->mkpath;
   
-  if (!-e $src) {
+  if (!-e "$src") {
     die "$src doesn't exist!";
-  } elsif (-d $src) {
+  } elsif (-d "$src") {
     $src = Path::Class::Dir->new($src);
     Path::Class::Dir->new($dest)->mkpath;
     $self->insert_hardlink($_) for $src->children;
