@@ -53,6 +53,6 @@ $cb->update_or_add_file({
 my @foo = ('a' x 20_000);
 BIGFILE
 });
-
+dies_ok(sub { $cb->compile_project() }, 'Died ok trying to compile oversize file');
 
 done_testing;

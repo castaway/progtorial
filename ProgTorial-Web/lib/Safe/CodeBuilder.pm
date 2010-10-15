@@ -14,9 +14,9 @@ has 'debug',            is => 'rw', default => 0;
 
 # Limits.
 # Maximum memory that the subprocesses may use, in bytes.  (Note that the actual limit will be rounded down to the nearest 1024-byte increment.)
-has 'max_memory',     is => 'rw';
+has 'max_memory',     is => 'rw', default => 20*1024*1024;
 # Maximum amount of disk space that the entire environment can use, in bytes.  (Note that the actual limit will be rounded down to the nearest 1024-byte increment.)
-has 'max_disk_space', is => 'rw';
+has 'max_disk_space', is => 'rw', default => 100_000;
 
 sub environment_directory {
   my ($self) = @_;
@@ -37,12 +37,9 @@ sub create_environment_directory {
   return 1 if(-d $dest);
   $dest->mkpath;
   
-  for my $thingy (which('perl'),
-                  '/bin/bash',
-                  '/usr/bin/make',
-                  '/dev/null',
+  for my $thingy ('/dev/null',
                   '/dev/urandom',
-                  (map {which($_)} qw<echo ls cat test [ sh which chmod chown touch true false cp>),
+                  (map {which($_)} qw<perl bash echo ls cat test [ sh which chmod chown touch true false cp make>),
                   $self->pm_file('Config')->parent->file('Config_heavy.pl'),
                   $self->pm_file('Config')->parent->file('Config_git.pl'),
                   # The core header files, required by MakeMaker even for non-XS modules.
@@ -92,13 +89,14 @@ sub run_in_child {
   # total size of the disk taken by all files written to by this process.
 
   # -m: the maximum resident set size
-  unshift @command, "ulimit -H -f ".$self->max_disk_space;
-  unshift @command, "ulimit -H -m ".$self->max_memory;
+  #unshift @command, "ulimit -H -f ".$self->max_disk_space;
+  #unshift @command, "ulimit -H -m ".$self->max_memory;
 
-  print STDERR "Running @command\n";
-  local $ENV{LANG} = 'C';
 
   my $cmd = join ';', @command;
+  print STDERR "Running $cmd\n";
+  local $ENV{LANG} = 'C';
+
   my $full_cmd = qq<sudo chroot --userspec 10005:10012 "$envdir" sh -c '$cmd'>;
   print STDERR "running $full_cmd\n";
   $| = 1;
@@ -110,9 +108,50 @@ sub run_in_child {
 sub compile_project {
   my ($self) = @_;
   
-  my $dir_inside = '/'.$self->project.'-0.01/';
-  $self->run_in_child("cd $dir_inside; perl Makefile.PL");
-  $self->run_in_child("cd $dir_inside; make");
+#  my $dir_inside = '/'.$self->project.'-0.01/';
+  my $dir_inside = $self->user_dir;
+  $self->run_in_child("cd /$dir_inside; perl Makefile.PL");
+  $self->run_in_child("cd /$dir_inside; make");
+}
+
+sub user_dir {
+    my ($self) = @_;
+
+    return $self->project.'-0.01/';
+}
+
+sub update_or_add_file {
+    my ($self, $filedata) = @_;
+
+    return if(!$filedata->{filename} || !$filedata->{content});
+
+    ## Not writing a file this large, should this die (kill the process !?)
+    if(length($filedata->{content}) > $self->max_disk_space) {
+        die "File content (in update_or_add) too large for allowed disk space";
+    }
+
+    if($filedata->{filename} =~ /[^\w\/\.-]/ or
+       $filedata->{filename} =~ m/^\./
+      ) {
+        die "Being picky about filename (in update_or_add) $filedata->{filename}";
+        return;
+    }
+
+    my $newfile = $self->environment_directory->subdir($self->user_dir)->file($filedata->{filename});
+
+    if (!$self->environment_directory->subsumes($newfile)) {
+        die "$newfile is not within ".$self->environment_directory." (from $filedata->{filename})";
+    }
+
+    ## croaks if there is an error:
+    $newfile->parent->mkpath();
+    $newfile->touch();
+
+    my $fh = $newfile->openw();
+    print $fh, $filedata->{content} or die "Can't print to $newfile: $!";
+    $fh->close or die "Can't close $newfile: $!";
+
+    return 1;
 }
 
 sub run_test {
