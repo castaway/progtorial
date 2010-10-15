@@ -10,6 +10,13 @@ has 'username',         is => 'ro';
 has 'project',          is => 'ro';
 has 'projects_dir',     is => 'ro';
 has 'environments_dir', is => 'ro';
+has 'debug',            is => 'rw', default => 0;
+
+# Limits.
+# Maximum memory that the subprocesses may use, in bytes.  (Note that the actual limit will be rounded down to the nearest 1024-byte increment.)
+has 'max_memory',     is => 'rw';
+# Maximum amount of disk space that the entire environment can use, in bytes.  (Note that the actual limit will be rounded down to the nearest 1024-byte increment.)
+has 'max_disk_space', is => 'rw';
 
 sub environment_directory {
   my ($self) = @_;
@@ -31,44 +38,43 @@ sub create_environment_directory {
   $dest->mkpath;
   
   for my $thingy (which('perl'),
-       '/bin/bash',
-       '/usr/bin/make',
-       '/dev/null',
-       '/dev/urandom',
-       (map {which($_)} qw<echo ls cat test [ sh which chmod chown touch true false cp>),
-       $self->pm_file('Config')->parent->file('Config_heavy.pl'),
-       $self->pm_file('Config')->parent->file('Config_git.pl'),
-       # The core header files, required by MakeMaker even for non-XS modules.
-       $self->pm_file('Config')->parent->subdir('CORE'),
-       # Required for running tests.
-       $self->pm_file('JSON::Any'),
-       $self->pm_file('JSON::XS'),
-       $self->pm_file('common::sense'),
-#       $self->pm_file('TAP::Parser'),
-#       $self->pm_file('TAP::Parser')->parent,
-#       $self->pm_file('TAP::Parser::SourceHandler::Executable')->parent->parent->parent,
-#       $self->pm_file('TAP::Parser::SourceHandler::Executable'),
-#       $self->pm_file('TAP::Parser::SourceHandler'),
-#       $self->pm_file('TAP::Parser::SourceHandler::Perl'),
-#       $self->pm_file('TAP::Parser::SourceHandler::File'),
-#       $self->pm_file('TAP::Parser::SourceHandler::RawTAP'),
-#       $self->pm_file('TAP::Parser::SourceHandler::Handle'),
-#       $self->pm_file('B::Utils'),
-#        $self->pm_file('Data::Dump::Streamer'),
-#        $self->pm_file('Data::Dump::Streamer')->parent->subdir('Streamer'),
-       
-       (map {$self->pm_file($_)}
-        grep {!($_ ~~ ['Time::Piece::Seconds', 'XS::APItest', 'DCLsym', 'Unicode', 'CGI::Fast', qr/Win32/])}
-        sort keys %{$Module::CoreList::version{$]}}
-       )) {
-#      print "Trying to link: $thingy\n";
-      $self->insert_hardlink($thingy);
+                  '/bin/bash',
+                  '/usr/bin/make',
+                  '/dev/null',
+                  '/dev/urandom',
+                  (map {which($_)} qw<echo ls cat test [ sh which chmod chown touch true false cp>),
+                  $self->pm_file('Config')->parent->file('Config_heavy.pl'),
+                  $self->pm_file('Config')->parent->file('Config_git.pl'),
+                  # The core header files, required by MakeMaker even for non-XS modules.
+                  $self->pm_file('Config')->parent->subdir('CORE'),
+                  # Required for running tests.
+                  $self->pm_file('JSON::Any'),
+                  $self->pm_file('JSON::XS'),
+                  $self->pm_file('common::sense'),
+                  $self->pm_file('TAP::Parser')->parent,
+                  $self->pm_file('TAP::Parser'),
+                  #$self->pm_file('TAP::Parser::SourceHandler::Executable')->parent->parent->parent,
+                  #$self->pm_file('TAP::Parser::SourceHandler::Executable'),
+                  #$self->pm_file('TAP::Parser::SourceHandler'),
+                  #$self->pm_file('TAP::Parser::SourceHandler::Perl'),
+                  #$self->pm_file('TAP::Parser::SourceHandler::File'),
+                  #$self->pm_file('TAP::Parser::SourceHandler::RawTAP'),
+                  #$self->pm_file('TAP::Parser::SourceHandler::Handle'),
+                  $self->pm_file('B::Utils'),
+                  $self->pm_file('Data::Dump::Streamer'),
+                  $self->pm_file('Data::Dump::Streamer')->parent->subdir('Streamer'),
+                  
+                  (map {$self->pm_file($_)}
+                   grep {!($_ ~~ ['Time::Piece::Seconds', 'XS::APItest', 'DCLsym', 'Unicode', 'CGI::Fast', qr/Win32/])}
+                   sort keys %{$Module::CoreList::version{$]}}
+                  )) {
+    #      print "Trying to link: $thingy\n";
+    $self->insert_hardlink($thingy);
   }
   $self->extract_archive($self->projects_dir->file($self->project.'-0.01.tar.gz'));
-
+  
   my $chown = 'chmod -R 777 ' . $self->environment_directory->subdir($self->project.'-0.01');
   `$chown`;
-
 }
 
 sub run_in_child {
@@ -77,10 +83,23 @@ sub run_in_child {
   my $envdir = $self->environment_directory;
 
   my $perl_dir = Path::Class::File->new(which('perl'))->dir;
-  unshift @command, "export LANG=C; export PATH=$perl_dir:/usr/bin:/bin;";
+  unshift @command, "export LANG=C";
+  unshift @command, "export PATH=$perl_dir:/usr/bin:/bin";
+
+
+  # -f: the maximum size of files written by the shell and its children
+  # It is unclear (to us, anyway) if this is the size of the largest single file, or the
+  # total size of the disk taken by all files written to by this process.
+
+  # -m: the maximum resident set size
+  unshift @command, "ulimit -H -f ".$self->max_disk_space;
+  unshift @command, "ulimit -H -m ".$self->max_memory;
+
   print STDERR "Running @command\n";
   local $ENV{LANG} = 'C';
-  my $full_cmd = qq<sudo chroot --userspec 10005:10012 "$envdir" sh -c '@command'>;
+
+  my $cmd = join ';', @command;
+  my $full_cmd = qq<sudo chroot --userspec 10005:10012 "$envdir" sh -c '$cmd'>;
   print STDERR "running $full_cmd\n";
   $| = 1;
   my $ret =`$full_cmd`;
@@ -201,6 +220,11 @@ sub result {
                    is_ok => $result->is_ok
                   };
                    
+
+  if (!exists $self->{all_ok}) {
+    $self->{all_ok} = 1;
+  }
+  $self->{all_ok} &&= $result->is_ok;
 
   push @{$self->{results}{$self->{current_filename}}{results}}, $my_result;
 
