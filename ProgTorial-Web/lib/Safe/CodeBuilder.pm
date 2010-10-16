@@ -4,6 +4,7 @@ use Moose;
 use MooseX::StrictConstructor;
 use Module::CoreList;
 use Archive::Extract;
+use File::Copy();
 use JSON::Any;
 
 has 'username',         is => 'ro';
@@ -68,6 +69,13 @@ sub create_environment_directory {
     #      print "Trying to link: $thingy\n";
     $self->insert_hardlink($thingy);
   }
+
+  ## Our files needed to run the tests etc:
+  $self->insert_actual_file($INC[-2],
+                            $self->pm_file('Safe::TAPFormatter'), 
+                            $self->class_to_file('Safe::TAPFormatter') );
+
+  ## Extract project tarball
   $self->extract_archive($self->projects_dir->file($self->project.'-0.01.tar.gz'));
   
   my $chown = 'chmod -R 777 ' . $self->environment_directory->subdir($self->project.'-0.01');
@@ -154,6 +162,28 @@ sub update_or_add_file {
     return 1;
 }
 
+## Copy the given file (find using path, copy using basename)
+## into the given directory in the user environment
+sub insert_actual_file {
+    my ($self, $dir, $filefrom, $fileto) = @_;
+
+    if(!-e $filefrom) {
+        die "Can't insert_actual_file $filefrom, not found";
+    }
+
+    # warn "insert_actual_file, dir=$dir, filefrom=$filefrom, fileto=$fileto";
+    my $dest = $self->environment_directory->subdir($dir)->file($fileto);
+    if(!$self->environment_directory->subsumes($dest)) {
+        die "Attempt to install file outside environment! $dir, $filefrom";
+    }
+    # die "Copying to $dest";
+
+    $dest->parent->mkpath;
+    File::Copy::copy("$filefrom", "$dest") or die "Copying $filefrom to $dest failed: $!";
+
+    return 1;
+}
+
 sub run_test {
   my ($self, @testnames) = @_;
   
@@ -165,6 +195,7 @@ sub run_test {
 #line 98 CodeBuilder.pm
 use warnings;
 use strict;
+use Safe::TAPFormatter;
 use TAP::Harness;
 use TAP::Parser;
 use JSON::Any;
@@ -185,7 +216,7 @@ if (-e "tests.json") {
   unlink "tests.json" or die("Can't remove tests.json $!");
 }
 
-my $formatter = MyFormatter->new;
+my $formatter = Safe::TAPFormatter->new;
 
 my $harness = TAP::Harness->new({
                                  lib  => [ 'blib/lib', 'blib/arch' ],
@@ -217,76 +248,6 @@ my $json = $jsonifier->objToJson($formatter);
 open $outfh, ">", 'tests.json' or die "Couldn't open tests.json: $!";
 print $outfh $json or die("Can't print to json file $!");
 close $outfh or die("Can't close fh, $!");
-
-package MyFormatter;
-use warnings;
-use strict;
-use parent 'TAP::Formatter::Base';
-
-sub open_test {
-  my ($self, $filename, $parser) = @_;
-  print "MyFormatter: open_test filename=$filename, parser=$parser\n";
-
-  # This is supposed to return a "session", which "result" can then be called on.
-  $self->{current_filename} = $filename;
-
-  return $self;
-}
-
-sub close_test {
-  my ($self) = @_;
-
-  $self->{current_filename} = undef;
-
-  return $self;
-}
-
-sub result {
-  my ($self, $result) = @_;
-
-  # result is a TAP::Parser::Result::Test
-
-  if ($result->isa('TAP::Parser::Result::Plan')) {
-    # Plans?  We don't need no steenkin plans.
-    return;
-  }
-
-  my $my_result = {
-                   number => $result->number,
-                   description => $result->description,
-                   directive => $result->directive, # undef, TODO, or SKIP.
-                   explanation => $result->explanation, # if directive is TODO or SKIP, why it was TODONE or SKIPped.
-                   is_ok => $result->is_ok
-                  };
-                   
-
-  if (!exists $self->{all_ok}) {
-    $self->{all_ok} = 1;
-  }
-  $self->{all_ok} &&= $result->is_ok;
-
-  push @{$self->{results}{$self->{current_filename}}{results}}, $my_result;
-
-}
-
-sub TO_JSON {
-  my ($self) = @_;
-
-  my $copy = {%$self};
-  delete $copy->{stdout};
-
-  return $copy;
-}
-
-#sub DESTROY {
-#}
-
-#sub AUTOLOAD {
-#  our $AUTOLOAD;
-#  die "MyFormatter::AUTOLOAD: $AUTOLOAD(@_)";
-#}
-
-1;
 
 END_RUNTESTS
   
@@ -418,16 +379,13 @@ sub insert_hardlink {
   }
 }
 
-# NB: You can call Path::Class methods on the result only for modules with no "auto" bits, and
-# it will give poor error messages if it fails.
+# NB: You can call Path::Class methods on the result, but it will give
+# poor error messages if it fails.
 sub pm_file {
   my ($self, $classname) = @_;
   # $self is unused.
 
-  if ($classname !~ m/\.pl$/) {
-    $classname =~ s!::!/!g;
-    $classname .= ".pm";
-  }
+  $classname = $self->class_to_file($classname);
 
   for (@INC) {
     my $filename = "$_/$classname";
@@ -442,7 +400,19 @@ sub pm_file {
     }
   }
 
+  warn "Can't find $classname";
   return ();
+}
+
+sub class_to_file {
+    my ($self, $classname) = @_;
+
+    if ($classname !~ m/\.pl$/) {
+        $classname =~ s!::!/!g;
+        $classname .= ".pm";
+    }
+    
+    return $classname;
 }
 
 # sub, not method
