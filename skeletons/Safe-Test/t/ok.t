@@ -7,4 +7,4 @@ use Test::More;
 
 ok(1, 'This definitely works');
 
-done_testing;
+done_testing(1);

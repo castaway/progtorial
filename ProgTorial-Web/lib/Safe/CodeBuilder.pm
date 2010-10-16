@@ -155,6 +155,7 @@ sub update_or_add_file {
     $newfile->parent->mkpath();
     $newfile->touch();
 
+    warn "Writing $filedata->{content} file to $newfile\n";
     my $fh = $newfile->openw();
     print $fh, $filedata->{content} or die "Can't print to $newfile: $!";
     $fh->close or die "Can't close $newfile: $!";
@@ -222,7 +223,12 @@ my $harness = TAP::Harness->new({
                                  lib  => [ 'blib/lib', 'blib/arch' ],
                                  formatter => $formatter
                                 });
-my $aggregator = $harness->runtests(@tests);
+eval {
+  my $aggregator = $harness->runtests(@tests);
+};
+if($@) {
+  warn "Runtests died";
+}
 # Docs for JSON::XS are terribly unclear.
 # allow_blessed   convert_blessed   effect
 #             0                 0   encountered object 'TAP::Parser::Aggregator=HASH(0x834cd58)', but neither allow_blessed nor convert_blessed settings are enabled

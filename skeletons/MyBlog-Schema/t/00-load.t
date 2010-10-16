@@ -1,6 +1,6 @@
 #!perl -T
 
-use Test::More tests => 1;
+use Test::More;
 
 BEGIN {
     use_ok( 'MyBlog::Schema' ) || print "Bail out!
@@ -8,3 +8,4 @@ BEGIN {
 }
 
 diag( "Testing MyBlog::Schema $MyBlog::Schema::VERSION, Perl $], $^X" );
+done_testing(1)

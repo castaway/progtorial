@@ -7,4 +7,4 @@ use Test::More;
 
 BAIL_OUT('This is only a test');
 
-done_testing;
+done_testing(0);

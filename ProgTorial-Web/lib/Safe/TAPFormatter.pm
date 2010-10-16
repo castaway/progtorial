@@ -26,19 +26,26 @@ sub result {
 
   # result is a TAP::Parser::Result::Test
 
+  warn "Collecting rsult $result";
+
   if ($result->isa('TAP::Parser::Result::Plan')) {
     # Plans?  We don't need no steenkin plans.
     return;
   }
 
-  my $my_result = {
+  my $my_result;
+  if($result->is_bailout) {
+      $my_result->{explanation} = $result->explanation;
+      $self->{all_ok} = 0;
+  } else {
+      $my_result = {
                    number => $result->number,
                    description => $result->description,
                    directive => $result->directive, # undef, TODO, or SKIP.
                    explanation => $result->explanation, # if directive is TODO or SKIP, why it was TODONE or SKIPped.
                    is_ok => $result->is_ok
                   };
-                   
+  }
 
   if (!exists $self->{all_ok}) {
     $self->{all_ok} = 1;
@@ -47,6 +54,19 @@ sub result {
 
   push @{$self->{results}{$self->{current_filename}}{results}}, $my_result;
 
+}
+
+sub summary {
+    my ($self, $aggregate, $interrupted) = @_;
+
+    warn "Collecting summary";
+
+    $self->{all_ok} = 0 if($interrupted);
+    $self->{total} = $aggregate->total;
+    $self->{passed} = $aggregate->passed;
+    $self->{runtime} = $aggregate->elapsed_timestr;
+
+    return $self->SUPER::summary($aggregate, $interrupted);
 }
 
 sub TO_JSON {
