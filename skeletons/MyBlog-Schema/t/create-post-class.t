@@ -31,4 +31,4 @@ SKIP: {
     is($schema->source('Post')->relationship_info('user')->{attrs}{accessor}, 'single', 'User relationship in Post source is a single accessor type');
 }
 
-done_testing(9);
+done_testing(10);
