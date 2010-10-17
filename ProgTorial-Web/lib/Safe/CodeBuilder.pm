@@ -291,7 +291,7 @@ sub insert_hardlink {
 
 
   my $orig_src = $src;
-#  print "insert_hardlink($src)\n";
+  print "insert_hardlink($src)\n";
   # We want to keep ".." from showing up, but we don't want to get the "real" name of symlinks.
   $src =~ s![^/]+/\.\./!/!;
   #print " ... manual fuckery -> $src\n" if $src ne $orig_src;
@@ -327,7 +327,6 @@ sub insert_hardlink {
     system @args;
   } elsif (-f $src) {
     
-    #print "$src magic: $magic\n";
     if (-l $src) {
       my $to = Path::Class::File->new(readlink($src));
       if ($to->is_relative) {
@@ -350,12 +349,12 @@ sub insert_hardlink {
         $magic = 'Perl5 module source text';
       } elsif ($src =~ m{\.packlist}) {
         $magic = 'ASCII text';
-      } elsif ($src =~ m/\.so$/) {
+      } elsif ($src =~ m/\.so(\.\d+)*$/) {
         $magic = 'ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.18, stripped';
       } elsif ($src =~ m/\.h$/) {
         $magic = 'ASCII C program text';
       } else {
-#        warn "Getting magic for $src";
+        warn "Getting magic for $src";
         
         $magic = `file $src`;
         chomp $magic;
@@ -394,6 +393,20 @@ sub insert_hardlink {
 sub pm_file {
   my ($self, $classname) = @_;
   # $self is unused.
+
+  my $and_children = $classname =~ m/::$/;
+  if ($and_children) {
+    warn "$classname and_children";
+
+    $classname =~ s/::$//;
+    warn "Modified classname: $classname";
+    my ($direct, $auto_dir) = $self->pm_file($classname);
+    warn "direct = $direct";
+    my ($last_segment) = $classname =~ m/::([^:]+)/;
+    warn "last segment $last_segment";
+    my $child_dir = $direct->parent->subdir($last_segment);
+    return grep {$_ and -e $_} ($direct, $auto_dir, $child_dir);
+  }
 
   $classname = $self->class_to_file($classname);
 
