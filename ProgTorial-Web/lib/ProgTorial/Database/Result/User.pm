@@ -1,8 +1,5 @@
 package ProgTorial::Database::Result::User;
 
-# Created by DBIx::Class::Schema::Loader
-# DO NOT MODIFY THE FIRST PART OF THIS FILE
-
 use strict;
 use warnings;
 
@@ -66,10 +63,4 @@ __PACKAGE__->add_columns(
 );
 __PACKAGE__->set_primary_key("id");
 
-
-# Created by DBIx::Class::Schema::Loader v0.07002 @ 2010-09-23 22:27:56
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:veBxD6Mc0lfdX9cB38BhiA
-
-
-# You can replace this text with custom content, and it will be preserved on regeneration
 1;
