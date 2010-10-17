@@ -39,6 +39,7 @@ ok(!-d $cb->environment_directory, 'Initially, no coding environment exists');
 
 ## create chroot env and unpack MyBlog-Schema.tar.gz (is it versioned?)
 lives_ok(sub { $cb->create_environment_directory() }, 'Created code directory without failing');
+
 ok(-d $cb->environment_directory, 'Created coding environment');
 
 ## Assumes debian ish 5.10 env
@@ -69,22 +70,25 @@ ok($loadtest->{all_ok}, 'PASSED load test');
 ok($cb->update_or_add_file({
     filename => 'lib/MyBlog/Schema/Result/Post.pm',
     content => << 'POSTPM',
-package MyBlog-Schema::Schema::Result::Post;
+package MyBlog::Schema::Result::Post;
 
 use strict;
-use warnings
+use warnings;
 
 use base 'DBIx::Class::Core';
 
 __PACKAGE__->table('posts');
-__PACKAGE__->add_columns('id' => { data_type => 'integer', is_auto_increment => 1 }, 'title', 'post', 'postdate');
+__PACKAGE__->add_columns('id' => { data_type => 'integer', is_auto_increment => 1 }, 'user_id', 'title', 'post', 'created_date');
 __PACKAGE__->set_primary_key('id');
+
+__PACKAGE__->belongs_to('user', 'MyBlog::Schema::Result::User', 'user_id');
 
 1;
 POSTPM
                            }), 'Added new file Post.pm to project');
 
 ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/lib/MyBlog/Schema/Result/Post.pm'), 'New Post.pm file exists');
+ok(-s $cb->environment_directory->file('MyBlog-Schema-0.01/lib/MyBlog/Schema/Result/Post.pm'), 'New Post.pm file has content of some sort');
 ok($cb->compile_project(), 'Project still compiles');
 
 $loadtest = $cb->run_test('t/00-load.t', 't/create-post-class.t');
@@ -95,12 +99,12 @@ ok($loadtest->{all_ok}, 'PASSED Post tests');
 
 ## Add broken file:
 ok($cb->update_or_add_file({
-    filename => 'MyBlog-Schema-0.01/lib/MyBlog/Schema/Result/Test.pm',
+    filename => 'lib/MyBlog/Schema/Result/Test.pm',
     content => << 'TESTPM',
-package MyBlog-Schema::Schema::Result::Test;
+package MyBlog::Schema::Result::Test;
 
 use strict;
-use warnings
+use warnings;
 
 use base 'DBIx::Class::Core';
 
@@ -114,7 +118,9 @@ __PACKAGE__->set_primary_key('id');
 TESTPM
                            }), 'Added new file Test.pm to project');
 
-ok(!$cb->compile_project(), 'Project doesn\'t compile (errors in code)');
+ok($cb->compile_project(), 'Project with bad .pm compiles (just runs make)');
+$loadtest = $cb->run_test('t/00-load.t');
+ok(!$loadtest->{all_ok}, 'FAILED Test tests (on purpose)');
 ## The actual error text here needs fixing:
 #is_deeply([$cb->errors], ['MyBlog-Schema-0.01/lib/MyBlog/Schema/Result/Test.pm: Error on line 9'], 'Found errors');
 

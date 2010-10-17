@@ -2,7 +2,7 @@
 ** TODO Path to user environment .. username/XX?
 ** TODO User Auth, OpenID?
 ** TODO Tutorial content
-** TODO layout of "system" skeletons/ = tarballs & content for base tutorial
+** DONE layout of "system" skeletons/ = tarballs & content for base tutorial
  exercises/ = subdir per chapter? containing tests/ dir, lib/ containing full
  solution needed up until this chapter to solve
  the current test, minus whatever the test is testing. overlay this onto the user's lib dir
@@ -40,6 +40,10 @@
 *** TODO Edit account details/email etc
 *** TODO View my exercises/tutorials/tarballs
 *** TODO Download my tarballs
+** TODO User settings
+*** TODO User bookmarks, store per tutorial - user has_many bookmarks (tutorial/exercise)
+*** TODO Automatic bookmarking, on/off
+** TODO Tutorials in DB, virtual, ::FS ?
 * Front-end
 ** DONE Setup single chapter page (Markdown / TT)
    CLOCK: [2010-09-19 Sun 19:14]--[2010-09-19 Sun 20:05] =>  0:51
@@ -55,7 +59,7 @@
 ** DONE Setup minimal navigation  (to all pages from any)
 ** DONE Create initial tutorial page to add interactivity to
 ** TODO Show/implement login/register forms inline? 
-** TODO Add "tutorials" section + pages
+** DONE Add "tutorials" section + pages
 ** TODO Port rest of DBIC tutorial
 * Features
 ** Download tarball of your current solution
