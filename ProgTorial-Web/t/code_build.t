@@ -115,7 +115,9 @@ __PACKAGE__->set_primary_key('id');
 TESTPM
                            }), 'Added new file Test.pm to project');
 
-ok(!$cb->compile_project(), 'Project doesn\'t compile (errors in code)');
+ok($cb->compile_project(), 'Project with bad .pm compiles (just runs make)');
+$loadtest = $cb->run_test('t/00-load.t');
+ok(!$loadtest->{all_ok}, 'FAILED Test tests (on purpose)');
 ## The actual error text here needs fixing:
 #is_deeply([$cb->errors], ['MyBlog-Schema-0.01/lib/MyBlog/Schema/Result/Test.pm: Error on line 9'], 'Found errors');
 

@@ -41,8 +41,9 @@
 *** TODO View my exercises/tutorials/tarballs
 *** TODO Download my tarballs
 ** TODO User settings
-*** TODO User bookmarks, store per tutorial
+*** TODO User bookmarks, store per tutorial - user has_many bookmarks (tutorial/exercise)
 *** TODO Automatic bookmarking, on/off
+** TODO Tutorials in DB, virtual, ::FS ?
 * Front-end
 ** DONE Setup single chapter page (Markdown / TT)
    CLOCK: [2010-09-19 Sun 19:14]--[2010-09-19 Sun 20:05] =>  0:51
