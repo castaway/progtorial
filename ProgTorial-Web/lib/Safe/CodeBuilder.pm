@@ -40,7 +40,7 @@ sub create_environment_directory {
   
   for my $thingy ('/dev/null',
                   '/dev/urandom',
-                  (map {which($_)} qw<perl bash echo ls cat test [ sh which chmod chown touch true false cp make>),
+                  (map {which($_)} qw<perl bash echo ls cat test [ sh which chmod chown touch true false cp make mv rm>),
                   $self->pm_file('Config')->parent->file('Config_heavy.pl'),
                   $self->pm_file('Config')->parent->file('Config_git.pl'),
                   # The core header files, required by MakeMaker even for non-XS modules.
@@ -108,8 +108,12 @@ sub run_in_child {
   my $full_cmd = qq<sudo chroot --userspec 10005:10012 "$envdir" sh -c '$cmd'>;
   print STDERR "running $full_cmd\n";
   $| = 1;
-  my $ret =`$full_cmd`;
-  print STDERR $ret;
+  my $ret =`$full_cmd 2>&1`;
+  {
+    my $debug_ret = $ret;
+    $debug_ret =~ s/^/child: /mg;
+    print STDERR $debug_ret;
+  }
   return $ret;
 }
 

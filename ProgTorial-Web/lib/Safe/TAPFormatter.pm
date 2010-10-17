@@ -26,7 +26,7 @@ sub result {
 
   # result is a TAP::Parser::Result::Test
 
-  warn "Collecting rsult $result";
+  warn "Collecting result $result";
 
   if ($result->isa('TAP::Parser::Result::Plan')) {
     # Plans?  We don't need no steenkin plans.
