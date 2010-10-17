@@ -161,7 +161,7 @@ sub update_or_add_file {
 
     warn "Writing $filedata->{content} file to $newfile\n";
     my $fh = $newfile->openw();
-    print $fh, $filedata->{content} or die "Can't print to $newfile: $!";
+    print $fh $filedata->{content} or die "Can't print to $newfile: $!";
     $fh->close or die "Can't close $newfile: $!";
 
     return 1;
