@@ -39,6 +39,7 @@ ok(!-d $cb->environment_directory, 'Initially, no coding environment exists');
 
 ## create chroot env and unpack MyBlog-Schema.tar.gz (is it versioned?)
 lives_ok(sub { $cb->create_environment_directory() }, 'Created code directory without failing');
+
 ok(-d $cb->environment_directory, 'Created coding environment');
 ## Assumes debian ish 5.10 env
 # ok(-e $cb->environment_directory->file('usr/share/perl/5.10/strict.pm'), 'Copied strict.pm');
@@ -92,7 +93,7 @@ ok($loadtest->{all_ok}, 'PASSED Post tests');
 
 ## Add broken file:
 ok($cb->update_or_add_file({
-    filename => 'MyBlog-Schema-0.01/lib/MyBlog/Schema/Result/Test.pm',
+    filename => 'lib/MyBlog/Schema/Result/Test.pm',
     content => << 'TESTPM',
 package MyBlog-Schema::Schema::Result::Test;
 

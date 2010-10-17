@@ -3,6 +3,7 @@ MANIFEST
 Makefile.PL
 README
 lib/MyBlog/Schema.pm
+lib/MyBlog/Schema/Result/User.pm
 t/var
 t/00-load.t
 t/create-post-class.t
