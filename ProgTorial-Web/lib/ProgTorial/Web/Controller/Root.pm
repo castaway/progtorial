@@ -51,18 +51,26 @@ sub default :Path {
 sub navigation : Private {
     my ($self, $c) = @_;
 
-    $c->stash('navigation' => [
-                  (!$c->user_exists ? (
-                        { url => $c->uri_for('/users/login'), name => 'Login' },
-                   ) : () ),
-                  ($c->user_exists ? (
-                       { url => $c->uri_for('/logout'), name => 'Logout' },
-                       { url => $c->uri_for($c->controller('User')->action_for('view_profile'), [ $c->user->username ]), name => 'Your page' },
-                       ) : ()),
-                  { url => $c->uri_for('/tutorials'), name => 'Tutorials' },
-              ],
-        current_page => $c->req->uri,
-        );
+    my $nav = [];
+    if ($c->user_exists) {
+        push @$nav, { url => $c->uri_for('/logout'), name => 'Logout' };
+        push @$nav, { url => $c->uri_for($c->controller('User')->action_for('view_profile'), [ $c->user->username ]), name => 'Your page'};
+
+        for my $bookmark ($c->user->obj->bookmarks) {
+            # FIXME: Let these be styled?
+            my $url = $c->uri_for($c->controller('Chapter')->action_for('chapter_index'), [ $bookmark->tutorial->tutorial, $bookmark->chapter ]);
+            my $name = $bookmark->tutorial->tutorial . ' - ' .$bookmark->chapter;
+            push @$nav, { url => $url, name => $name };
+        }
+    } else {
+        push @$nav, { url => $c->uri_for('/users/login'), name => 'Login' };
+    }
+
+    push @$nav, { url => $c->uri_for('/tutorials'), name => 'Tutorials' };
+
+    $c->stash(navigation => $nav,
+              current_page => $c->req->uri,
+             );
 }
 
 =head2 end

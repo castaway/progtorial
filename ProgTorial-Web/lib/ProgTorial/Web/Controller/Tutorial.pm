@@ -58,18 +58,20 @@ sub tutorial :Chained('tutorial_base') :PathPart('') :CaptureArgs(1) {
 
     ## Untaint!
     $tutorial =~ s/[^\w-]//g;
-    $c->log->debug("tutorial_path: ".$c->config->{tutorial_path});
-    $c->log->debug("tutorial: ".$tutorial);
 
-    if(!-d $c->config->{tutorial_path}->subdir($tutorial)) {
+    my $tutorial_path = $c->config->{tutorial_path}->subdir($tutorial);
+
+    if(!-d $tutorial_path) {
         print STDERR "Can't find tutorial in path, redirecting..";
-        print STDERR $c->config->{tutorial_path}->subdir($tutorial), "\n";
+        print STDERR $tutorial_path, "\n";
         die "FIXME: This is quite broken";
         return $c->res->redirect($c->uri_for($self->action_for('tutorial_index')));
     }
 
-    $c->stash(tutorial => $c->config->{tutorial_path}->subdir($tutorial));
-    $c->log->debug("stashed: " . $c->stash->{tutorial});
+
+    $c->stash(tutorial_path => $tutorial_path);
+    $c->stash(tutorial => $tutorial_path->dir_list(-1, 1));
+    $c->log->debug("stashed tutorial: " . $c->stash->{tutorial});
 }
 
 ## This might be overkill.. ;)

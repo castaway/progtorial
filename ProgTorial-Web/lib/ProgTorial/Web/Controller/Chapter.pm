@@ -23,10 +23,6 @@ Catalyst Controller.
 =cut
 
 
-=head2 index
-
-=cut
-
 sub base :Chained('/tutorial/tutorial') :PathPart('chapter') :CaptureArgs(0) {
     my ($self, $c) = @_;
 
@@ -39,7 +35,7 @@ sub base :Chained('/tutorial/tutorial') :PathPart('chapter') :CaptureArgs(0) {
                                   ),
                                   name => $_->{chapter} }
     }
-    (sort { $a->{order} <=> $b->{order} } $self->get_chapter_configs($c->stash->{tutorial}));
+    (sort { $a->{order} <=> $b->{order} } $self->get_chapter_configs($c->stash->{tutorial_path}));
 
     push @{$c->stash->{navigation}}, @chapter_nav;
 }
@@ -50,7 +46,7 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
 
     ## <chapter>.md
     $c->log->_dump($c->stash);
-    my $chapter_file = $self->find_chapter($c->stash->{tutorial}, $chapter);
+    my $chapter_file = $self->find_chapter($c->stash->{tutorial_path}, $chapter);
     
     ## Catch random rubbish in url and send back to start.
     if($chapter_file) {
@@ -62,6 +58,7 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
     ## <chapter>.cfg
     my $config = $self->find_config($chapter_file);
     $c->stash(config => $config);
+    $c->stash(chapter => $config->{chapter});
     $c->stash(exercises => $self->load_exercises($c, $config, $chapter));
 
     if($c->session_expires(1)) {
@@ -105,15 +102,25 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
     my $results = $c->model('CodeBuilder')->compile_project();
 }
 
+=head2 index
+
+=cut
+
 sub chapter_index :Chained('chapter') :PathPart('') :Args(0) {
     my ($self, $c) = @_;
 
-    ## end chain for plain chapter index, 
-    ## do we need this one or just for testing?
+    if ($c->user_exists) {
+        $c->model('Database::Bookmark')->update_or_create({user => $c->user->obj,
+                                                           tutorial => $c->stash->{tutorial},
+                                                           chapter => $c->stash->{chapter},
+                                                           # FIXME: why doesn't undef work here?
+                                                           exercise => ''});
+    }
 
+    ## end chain for plain chapter index.
     $c->stash(content => scalar $c->stash->{current_chapter}->slurp);
 }
- 
+
 # sub index :Path :Args(0) {
 #     my ( $self, $c ) = @_;
 
