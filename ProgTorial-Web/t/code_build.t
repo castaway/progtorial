@@ -41,6 +41,7 @@ ok(!-d $cb->environment_directory, 'Initially, no coding environment exists');
 lives_ok(sub { $cb->create_environment_directory() }, 'Created code directory without failing');
 
 ok(-d $cb->environment_directory, 'Created coding environment');
+
 ## Assumes debian ish 5.10 env
 # ok(-e $cb->environment_directory->file('usr/share/perl/5.10/strict.pm'), 'Copied strict.pm');
 
@@ -50,6 +51,8 @@ for (grep {$_ =~ /perlbrew/ && -e} @INC) {
     print STDERR "Adding INC $_\n";
     $cb->insert_hardlink($_);
 }
+$cb->insert_hardlink($_) for (map {$cb->pm_file($_)} 'DBIx::Class::', 'Carp::Clan::');
+
 
 ok(-e $cb->environment_directory->file('MyBlog-Schema-0.01/Makefile.PL'), 'Unpacked tarball there');
 

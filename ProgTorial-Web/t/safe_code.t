@@ -27,7 +27,6 @@ my $cb = Safe::CodeBuilder->new({
                                 });
 
 $cb->create_environment_directory();
-## Assumes env is set up already
 
 ok($cb->compile_project(), 'Compiled project without errors');
 my $ret;
