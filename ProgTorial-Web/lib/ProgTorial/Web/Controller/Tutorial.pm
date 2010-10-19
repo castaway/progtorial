@@ -2,6 +2,8 @@ package ProgTorial::Web::Controller::Tutorial;
 use Moose;
 use namespace::autoclean;
 
+use Config::Any::JSON;
+
 BEGIN {extends 'Catalyst::Controller'; }
 
 =head1 NAME
@@ -34,6 +36,21 @@ sub tutorial_index: Chained('tutorial_base') :PathPart('') :Args(0) {
     my ($self, $c) = @_;
 
     ## List tutorials (+chapters?) here using $c->config('tutorial_path').
+
+    ## $c->model('Tutorials')->all->config, or something !?
+
+    $c->forward('/navigation');
+
+    my @tutorials  =  map { 
+        +{
+          capture => $_->dir_list(-1, 1),
+          chapters => $self->get_chapters($_),
+          %{
+              Config::Any::JSON->load($_->file('config.cfg'))
+            }
+         }
+    } $c->config->{tutorial_path}->children;
+    $c->stash(tutorials => \@tutorials);
 }
 
 sub tutorial :Chained('tutorial_base') :PathPart('') :CaptureArgs(1) {
@@ -41,14 +58,35 @@ sub tutorial :Chained('tutorial_base') :PathPart('') :CaptureArgs(1) {
 
     ## Untaint!
     $tutorial =~ s/[^\w-]//g;
+    $c->log->debug("tutorial_path: ".$c->config->{tutorial_path});
+    $c->log->debug("tutorial: ".$tutorial);
+
     if(!-d $c->config->{tutorial_path}->subdir($tutorial)) {
         print STDERR "Can't find tutorial in path, redirecting..";
         print STDERR $c->config->{tutorial_path}->subdir($tutorial), "\n";
+        die "FIXME: This is quite broken";
         return $c->res->redirect($c->uri_for($self->action_for('tutorial_index')));
     }
 
     $c->stash(tutorial => $c->config->{tutorial_path}->subdir($tutorial));
     $c->log->debug("stashed: " . $c->stash->{tutorial});
+}
+
+## This might be overkill.. ;)
+sub tutorial_end :Chained('tutorial') :PathPart('') :Args(0) {
+    my ($self, $c) = @_;
+}
+
+sub get_chapters {
+    my ($self, $tutorial_dir) = @_;
+
+    ## *.md? 
+    my @chapters = grep { /\.md$/ } $tutorial_dir->children;
+    return [ map { 
+        my $f = $_->stringify; 
+        $f =~ s/\.md/\.cfg/; 
+        Config::Any::JSON->load($f)
+      } @chapters ];
 }
 
 =head1 AUTHOR

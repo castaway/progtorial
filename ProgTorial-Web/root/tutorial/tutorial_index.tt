@@ -1,0 +1,12 @@
+<ul>
+[% FOREACH t = tutorials %]
+  <li><a href="[% c.uri_for(c.controller('Tutorial').action_for('tutorial_end'), [ t.capture ]) %]">[% t.name %]</a></li>
+  [% IF t.chapters.size %]
+    <ul>
+    [% FOREACH chap_conf = t.chapters %]
+      <li><a href="[% c.uri_for(c.controller('Chapter').action_for('chapter_index'), [ t.capture, chap_conf.chapter ]) %]">[% chap_conf.chapter %]</a></li>
+    [% END %]
+    </ul>
+  [% END %]
+[% END %]
+</ul>
