@@ -50,7 +50,7 @@ __PACKAGE__->config(
         pages_path => ProgTorial::Web->path_to('pages'),
     },
     projects_path => Path::Class::Dir->new('/usr/src/perl/progtorial/skeletons/'),
-    env_path => Path::Class::Dir->new('/tmp'),
+    env_path => Path::Class::Dir->new('/tmp/progtorial_env'),
 #    'Controller::User' => { traits => 'Login::OpenID' },
     'Controller::Login' => {
 #        traits => ['OpenID'],

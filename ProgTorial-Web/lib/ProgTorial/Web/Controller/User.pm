@@ -53,7 +53,8 @@ sub view_own_profile :Private {
 ## Used by Catalyst::ActionRole::NeedsLogin
 sub login_redirect {
     my ($self, $ctx) = @_;
-    $ctx->response->redirect($ctx->uri_for($self->action_for('register_or_login')));
+    my $redir = $ctx->uri_for($self->action_for('register_or_login') || '/');
+    $ctx->response->redirect($redir);
     $ctx->detach;
 }
 
@@ -65,15 +66,34 @@ sub register_or_login :Chained('user_base') :PathPart('login') :Args(0) {
         $form->process(ctx => $c, params => $c->req->params, verbose => 1 );
         ## Register, else authenticated by validate()
         if($form->validated) {
+            $c->log->info('Validated register');
+            ## Move all this into the form so that if user create fails
+            ## validate fails and user can retry
             if($form->field('is_register')->value) {
+                $c->log->info('is Register = true');
                 my $user_rs = $c->model('Database::User');
-                $user_rs->create( { 
+                my $newuser = $user_rs->create( { 
                     ( map { $user_rs->result_source->has_column($_) ? ($_, $c->req->param($_)) : () }
                       keys %{ $c->req->params}),
-                    displayname => $c->req->param('username')});
+                    displayname => $c->req->param('username')
+                                                });
+                if($newuser) {
+                    $c->authenticate({ username => $c->req->param('username'),
+                                       password => $c->req->param('password') });
+                } else {
+                    die "Failed to create user";
+                }
+                ## Where should this go?
+                if($c->user_exists && $c->req->param('do_createenv')) {
+                    ## No "current project" here? S::CB needs to not care..
+                    $c->model('CodeBuilder')->create_environment_directory();
+                }
                 # $c->res->redirect($c->uri_for('/'));
+            } else {
+                ## Has logged in:
+                $c->model('CodeBuilder')->create_environment_directory();
             }
-
+            $c->session->{redirect_to_after_login} ||= $c->uri_for('/');
             $c->res->redirect($c->session->{redirect_to_after_login});
             $c->extend_session_expires(999999999999)
                 if $form->field( 'remember' )->value;

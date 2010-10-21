@@ -22,13 +22,34 @@ has 'max_disk_space', is => 'rw', default => 100_000;
 sub environment_directory {
   my ($self) = @_;
 
-  return $self->environments_dir->subdir($self->username, $self->project);
+#  return $self->environments_dir->subdir($self->username, $self->project);
+  return $self->environments_dir->subdir($self->username);
 }
 
 sub create_code_directory {
   my ($self) = @_;
 
   $self->create_environment_directory;
+  $self->unpack_project;
+}
+
+sub unpack_project {
+    my ($self) = @_;
+
+  ## Extract project tarball
+  $self->extract_archive($self->projects_dir->file($self->project.'-0.01.tar.gz'));
+  
+  my $chown = 'chmod -R 777 ' . $self->environment_directory->subdir($self->project.'-0.01');
+  `$chown`;
+
+}
+
+## Return true if unpacking already taken place
+## Assume project dir == tarball name
+sub project_unpacked {
+    my ($self) = @_;
+
+    return -d $self->environment_directory->subdir($self->project.'-0.01');
 }
 
 sub create_environment_directory {
@@ -66,7 +87,7 @@ sub create_environment_directory {
                    grep {!($_ ~~ ['Time::Piece::Seconds', 'XS::APItest', 'DCLsym', 'Unicode', 'CGI::Fast', qr/Win32/])}
                    sort keys %{$Module::CoreList::version{$]}}
                   )) {
-    #      print "Trying to link: $thingy\n";
+    #      print STDERR "Trying to link: $thingy\n";
     $self->insert_hardlink($thingy);
   }
 
@@ -75,11 +96,6 @@ sub create_environment_directory {
                             $self->pm_file('Safe::TAPFormatter'), 
                             $self->class_to_file('Safe::TAPFormatter') );
 
-  ## Extract project tarball
-  $self->extract_archive($self->projects_dir->file($self->project.'-0.01.tar.gz'));
-  
-  my $chown = 'chmod -R 777 ' . $self->environment_directory->subdir($self->project.'-0.01');
-  `$chown`;
 }
 
 sub run_in_child {
@@ -291,7 +307,7 @@ sub insert_hardlink {
 
 
   my $orig_src = $src;
-  print "insert_hardlink($src)\n";
+#  print STDERR "insert_hardlink($src)\n";
   # We want to keep ".." from showing up, but we don't want to get the "real" name of symlinks.
   $src =~ s![^/]+/\.\./!/!;
   #print " ... manual fuckery -> $src\n" if $src ne $orig_src;

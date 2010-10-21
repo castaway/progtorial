@@ -5,8 +5,11 @@
 [% form.render %]
 <script type="text/javascript">
   jQuery('.register_field').hide();
-  jQuery('.register_switch :checkbox').change( function() {
-    if(jQuery(this).attr('checked')) {
+
+  register_callback('.register_switch :checkbox');
+
+  function register_callback(chbox) {
+    if(jQuery(chbox).attr('checked')) {
         jQuery('.register_field').show();
         jQuery('.login_field').hide();
         jQuery(':submit').attr('value', 'Register');
@@ -15,7 +18,10 @@
        jQuery('.register_field').hide();
        jQuery('.login_field').show();
        jQuery(':submit').attr('value', 'Login');
-        return true;
+       return true;
     }
-});
+  }
+
+  jQuery('.register_switch :checkbox').change( function() { register_callback(this) } );
+
 </script>

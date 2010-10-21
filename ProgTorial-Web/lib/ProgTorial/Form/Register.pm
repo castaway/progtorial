@@ -36,6 +36,11 @@ has_field 'email' => ( type => 'Email',
                        required_message => 'Please enter your email address',
     );
 
+has_field 'do_createenv' => (type => 'Checkbox',
+#                           css_class => 'register_field',
+                           label => 'Create coding environment'
+    );
+
 
 has_field 'register' => ( type => 'Submit', 
                           css_class => 'register_submit',

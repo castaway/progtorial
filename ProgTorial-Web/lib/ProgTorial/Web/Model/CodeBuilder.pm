@@ -15,12 +15,16 @@ sub prepare_arguments {
         die "Somehow tried to create a CodeBuilder when no user is logged in..";
     }
 
-    return {
+    my $args = {
         username => $c->user->username,
-        project => $c->session->{current_project},
+        project => $c->session->{current_project} || '',
         projects_dir => $c->config->{projects_path},
         environments_dir => $c->config->{env_path},
     };
+
+    $c->log->_dump($args);
+
+    return $args;
 }
 
 1;

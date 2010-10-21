@@ -31,7 +31,7 @@ sub base :Chained('/tutorial/tutorial') :PathPart('chapter') :CaptureArgs(0) {
 #    $c->log->_dump($self->get_chapter_configs);
     my @chapter_nav = map { { url => $c->uri_for( 
                                   $self->action_for('chapter_index'), 
-                                  [$_->{chapter}]
+                                  [$c->req->captures->[0], $_->{chapter}]
                                   ),
                                   name => $_->{chapter} }
     }
@@ -66,10 +66,6 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
         ## CodeBuilder when on exercise submission
         $c->session(current_project => $config->{distribution});
 
-        ## Where should this go?
-        if($c->user_exists) {
-            $c->model('CodeBuilder')->create_environment_directory();
-        }
     }
 
     $c->stash(login_invite => sub { 
@@ -99,7 +95,13 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
         die "Shouldn't be able to get here with no user? (session expired?)";
     }
 
-    my $results = $c->model('CodeBuilder')->compile_project();
+    if(!$c->model('CodeBuilder')->project_unpacked) {
+        $c->model('CodeBuilder')->unpack_project;
+    }
+
+    $c->model('CodeBuilder')->compile_project();
+    my $results = $c->model('CodeBuilder')->run_test('t/00-load.t',
+                                                     't/' . $exercise . '.t');
 }
 
 =head2 index
@@ -178,7 +180,7 @@ sub load_exercises {
         my $form = ProgTorial::Form::Exercise->new();
         $form->field('exercise')->value($_);
         $form->action($c->uri_for($self->action_for('exercise'), 
-                                  [ $chapter ]));
+                                  [ $c->req->captures->[0], $chapter ]));
 #        print STDERR "Form:", $form->render, "\n";
         ( $_ => $form );
             }
