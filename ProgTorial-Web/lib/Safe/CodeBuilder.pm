@@ -370,7 +370,7 @@ sub insert_hardlink {
       } elsif ($src =~ m/\.h$/) {
         $magic = 'ASCII C program text';
       } else {
-        warn "Getting magic for $src";
+#        warn "Getting magic for $src";
         
         $magic = `file $src`;
         chomp $magic;

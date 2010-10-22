@@ -91,7 +91,15 @@ sub register_or_login :Chained('user_base') :PathPart('login') :Args(0) {
                 # $c->res->redirect($c->uri_for('/'));
             } else {
                 ## Has logged in:
-                $c->model('CodeBuilder')->create_environment_directory();
+                my $cb = $c->model('CodeBuilder');
+                $cb->create_environment_directory();
+
+## Update env with deps:
+## (better handling of deps for project X needed)
+                for (grep {$_ =~ /perlbrew/ && -e} @INC) {
+#                    print STDERR "Adding INC $_\n";
+                    $cb->insert_hardlink($_);
+                }
             }
             $c->session->{redirect_to_after_login} ||= $c->uri_for('/');
             $c->res->redirect($c->session->{redirect_to_after_login});

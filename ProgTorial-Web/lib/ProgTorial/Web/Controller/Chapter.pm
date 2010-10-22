@@ -95,13 +95,19 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
         die "Shouldn't be able to get here with no user? (session expired?)";
     }
 
-    if(!$c->model('CodeBuilder')->project_unpacked) {
-        $c->model('CodeBuilder')->unpack_project;
+    ## temp var as Factory creates new each ->model, not per req, should it cache?
+    my $cb = $c->model('CodeBuilder');
+    if(!$cb->project_unpacked) {
+        $cb->unpack_project;
     }
 
-    $c->model('CodeBuilder')->compile_project();
-    my $results = $c->model('CodeBuilder')->run_test('t/00-load.t',
-                                                     't/' . $exercise . '.t');
+    $cb->update_or_add_file({ filename => $c->stash->{exercises}{$exercise}{file},
+                              ## de-taint??
+                              content => $c->req->param('answer')
+                                });
+    $cb->compile_project();
+    my $results = $cb->run_test('t/00-load.t',
+                                't/' . $exercise . '.t');
 }
 
 =head2 index
@@ -176,13 +182,15 @@ sub load_exercises {
     my ($self, $c, $config, $chapter) = @_;
 
     return {map {
-        print STDERR "Ex: $_\n";
+        my $exercise = $_->{name};
+        print STDERR "Loading Ex: $exercise\n";
         my $form = ProgTorial::Form::Exercise->new();
-        $form->field('exercise')->value($_);
+        $form->field('exercise')->value($exercise);
         $form->action($c->uri_for($self->action_for('exercise'), 
                                   [ $c->req->captures->[0], $chapter ]));
+        $_->{form} = $form;
 #        print STDERR "Form:", $form->render, "\n";
-        ( $_ => $form );
+        ( $exercise => $_ );
             }
             @{ $config->{exercises} } 
     };
