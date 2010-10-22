@@ -42,6 +42,7 @@ sub unpack_project {
   my $chown = 'chmod -R 777 ' . $self->environment_directory->subdir($self->project.'-0.01');
   `$chown`;
 
+    return 1;
 }
 
 ## Return true if unpacking already taken place
