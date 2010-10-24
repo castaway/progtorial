@@ -68,7 +68,9 @@ sub tutorial :Chained('tutorial_base') :PathPart('') :CaptureArgs(1) {
         return $c->res->redirect($c->uri_for($self->action_for('tutorial_index')));
     }
 
-
+    ## Debugging issues with $c->go .. 
+#    $c->log->debug("Tutorial passed in capture: $tutorial");
+#    $c->log->debug("Tutorial paath: $tutorial_path");
     $c->stash(tutorial_path => $tutorial_path);
     $c->stash(tutorial => $tutorial_path->dir_list(-1, 1));
     $c->log->debug("stashed tutorial: " . $c->stash->{tutorial});

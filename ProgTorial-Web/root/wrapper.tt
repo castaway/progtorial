@@ -14,7 +14,7 @@
    <div class="span-6">
      [% INCLUDE navigation.tt %]
    </div>
-   <div class="span-17 last">
+   <div class="span-18 last">
    [% content | evaltt %]
   </div>
  </div>

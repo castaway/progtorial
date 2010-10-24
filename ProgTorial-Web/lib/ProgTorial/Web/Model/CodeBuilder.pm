@@ -22,7 +22,7 @@ sub prepare_arguments {
         environments_dir => $c->config->{env_path},
     };
 
-    $c->log->_dump($args);
+#    $c->log->_dump($args);
 
     return $args;
 }

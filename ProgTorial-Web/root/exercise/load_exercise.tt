@@ -1,3 +1,9 @@
 [%# Logged in user %]
 
+<div class="span-9">
 [% exercises.$exercise.form.render %]
+</div>
+<div class="span-9 last">
+  [% results %]
+</div>
+<div style="clear: both"></div>

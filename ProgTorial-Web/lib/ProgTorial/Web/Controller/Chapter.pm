@@ -45,7 +45,7 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
     my ($self, $c, $chapter) = @_;
 
     ## <chapter>.md
-    $c->log->_dump($c->stash);
+#    $c->log->_dump($c->stash);
     my $chapter_file = $self->find_chapter($c->stash->{tutorial_path}, $chapter);
     
     ## Catch random rubbish in url and send back to start.
@@ -108,6 +108,14 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
     $cb->compile_project();
     my $results = $cb->run_test('t/00-load.t',
                                 't/' . $exercise . '.t');
+    $c->stash(results => $results);
+    $c->stash(user_input => $c->req->param('answer'));
+    
+#    $c->log->_dump($results);
+    $c->log->info("Exercise, captures");
+    $c->log->_dump($c->req->captures);
+    return $c->visit($self->action_for('chapter_index'), $c->req->captures, []);
+
 }
 
 =head2 index
@@ -186,6 +194,7 @@ sub load_exercises {
         print STDERR "Loading Ex: $exercise\n";
         my $form = ProgTorial::Form::Exercise->new();
         $form->field('exercise')->value($exercise);
+        $form->field('answer', $c->stash->{user_input});
         $form->action($c->uri_for($self->action_for('exercise'), 
                                   [ $c->req->captures->[0], $chapter ]));
         $_->{form} = $form;
