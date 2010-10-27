@@ -59,7 +59,7 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
     my $config = $self->find_config($chapter_file);
     $c->stash(config => $config);
     $c->stash(chapter => $config->{chapter});
-    $c->stash(exercises => $self->load_exercises($c, $config, $chapter));
+    $c->stash->{exercises} ||= $self->load_exercises($c, $config, $chapter);
 
     if($c->session_expires(1)) {
         ## Store current project associated with this chapter, to send to
@@ -101,6 +101,8 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
         $cb->unpack_project;
     }
 
+    $c->stash->{exercises}{$exercise}{form}->field('answer')->value($c->req->param('answer'));
+
     $cb->update_or_add_file({ filename => $c->stash->{exercises}{$exercise}{file},
                               ## de-taint??
                               content => $c->req->param('answer')
@@ -109,9 +111,8 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
     my $results = $cb->run_test('t/00-load.t',
                                 't/' . $exercise . '.t');
     $c->stash(results => $results);
-    $c->stash(user_input => $c->req->param('answer'));
     
-#    $c->log->_dump($results);
+    $c->log->_dump($results);
     $c->log->info("Exercise, captures");
     $c->log->_dump($c->req->captures);
     return $c->visit($self->action_for('chapter_index'), $c->req->captures, []);
@@ -194,7 +195,8 @@ sub load_exercises {
         print STDERR "Loading Ex: $exercise\n";
         my $form = ProgTorial::Form::Exercise->new();
         $form->field('exercise')->value($exercise);
-        $form->field('answer', $c->stash->{user_input});
+
+#        $form->field('answer', $c->stash->{user_input});
         $form->action($c->uri_for($self->action_for('exercise'), 
                                   [ $c->req->captures->[0], $chapter ]));
         $_->{form} = $form;

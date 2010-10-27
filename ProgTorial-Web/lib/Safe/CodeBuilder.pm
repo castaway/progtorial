@@ -242,7 +242,8 @@ my $formatter = Safe::TAPFormatter->new;
 
 my $harness = TAP::Harness->new({
                                  lib  => [ 'blib/lib', 'blib/arch' ],
-                                 formatter => $formatter
+                                 formatter => $formatter,
+                                 merge => 1,
                                 });
 eval {
   my $aggregator = $harness->runtests(@tests);

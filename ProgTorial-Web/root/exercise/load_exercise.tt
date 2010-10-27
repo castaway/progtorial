@@ -4,6 +4,6 @@
 [% exercises.$exercise.form.render %]
 </div>
 <div class="span-9 last">
-  [% results %]
+  [% USE Dumper; Dumper.dump(results) %]
 </div>
 <div style="clear: both"></div>
