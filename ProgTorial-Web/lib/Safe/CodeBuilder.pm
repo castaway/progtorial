@@ -50,7 +50,7 @@ sub unpack_project {
 sub project_unpacked {
     my ($self) = @_;
 
-    return -d $self->environment_directory->subdir($self->project.'-0.01');
+    return -d $self->parent_user_dir;
 }
 
 sub create_environment_directory {
@@ -137,16 +137,26 @@ sub run_in_child {
 sub compile_project {
   my ($self) = @_;
   
-#  my $dir_inside = '/'.$self->project.'-0.01/';
-  my $dir_inside = $self->user_dir;
+  die "compile_project before project unpacked?"
+    unless $self->project_unpacked;
+
+  my $dir_inside = $self->child_user_dir;
   $self->run_in_child("cd /$dir_inside; perl Makefile.PL");
   $self->run_in_child("cd /$dir_inside; make");
 }
 
-sub user_dir {
+# From the point of view of the child
+sub child_user_dir {
     my ($self) = @_;
 
     return $self->project.'-0.01/';
+}
+
+# From the point of view of the parent
+sub parent_user_dir {
+  my ($self) = @_;
+
+  return $self->environment_directory->subdir($self->child_user_dir);
 }
 
 sub update_or_add_file {
@@ -166,7 +176,7 @@ sub update_or_add_file {
         return;
     }
 
-    my $newfile = $self->environment_directory->subdir($self->user_dir)->file($filedata->{filename});
+    my $newfile = $self->parent_user_dir->file($filedata->{filename});
 
     if (!$self->environment_directory->subsumes($newfile)) {
         die "$newfile is not within ".$self->environment_directory." (from $filedata->{filename})";
@@ -209,9 +219,8 @@ sub insert_actual_file {
 sub run_test {
   my ($self, @testnames) = @_;
   
-  open my $outfh, ">", $self->environment_directory
-    ->subdir($self->project.'-0.01')
-      ->file('runtests.pl');
+  my $outfn = $self->parent_user_dir->file('runtests.pl');
+  open(my $outfh, ">", $outfn) or die "Can't open $outfn (from parent's point of view): $!";
   print $outfh <<'END_RUNTESTS';
 #!/usr/bin/perl
 #line 98 CodeBuilder.pm
@@ -242,12 +251,16 @@ my $formatter = Safe::TAPFormatter->new;
 
 my $harness = TAP::Harness->new({
                                  lib  => [ 'blib/lib', 'blib/arch' ],
-                                 formatter => $formatter
+                                 formatter => $formatter,
+                                 merge => 1,
                                 });
 eval {
   my $aggregator = $harness->runtests(@tests);
 };
 if($@) {
+  print STDERR "BEGINNING OF RUNTESTS DOLLAR AT\n";
+  print STDERR "$@\n";
+  print STDERR "END OF RUNTESTS DOLLAR AT\n";
   warn "Runtests died";
 }
 # Docs for JSON::XS are terribly unclear.
