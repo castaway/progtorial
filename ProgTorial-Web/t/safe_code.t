@@ -28,6 +28,7 @@ my $cb = Safe::CodeBuilder->new({
 
 $cb->create_environment_directory();
 
+
 ok($cb->compile_project(), 'Compiled project without errors');
 my $ret;
 $ret = $cb->run_test('t/2ok.t');
@@ -42,10 +43,10 @@ $ret = $cb->run_test('t/bail.t');
 ok(1, 'Survived a bail test');
 diag(Dumper(['bail test', $ret]));
 
-dies_ok(sub { $cb->update_or_add_file({
-    filename => 'BIGFILETEST.txt',
-    content => ('a' x 100_000),
-}) }, 'dies when asked to store file larger than allowed disk space');
+#dies_ok(sub { $cb->update_or_add_file({
+#    filename => 'BIGFILETEST.txt',
+#    content => ('a' x 100_000),
+#}) }, 'dies when asked to store file larger than allowed disk space');
 
 # # I have no idea what this is attempting to test.
 # $cb->update_or_add_file({

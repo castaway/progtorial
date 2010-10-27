@@ -3,12 +3,21 @@ use warnings;
 use strict;
 use parent 'TAP::Formatter::Base';
 
+sub _initialize {
+  my ($self) = @_;
+  TAP::Formatter::Base->can('_initialize')->(@_);
+  $self->{all_ok} = 1;
+
+  return $self;
+}
+
 sub open_test {
   my ($self, $filename, $parser) = @_;
   print "MyFormatter: open_test filename=$filename, parser=$parser\n";
 
   # This is supposed to return a "session", which "result" can then be called on.
   $self->{current_filename} = $filename;
+  $self->{files}{$filename} ||= {};
 
   return $self;
 }
@@ -28,32 +37,42 @@ sub result {
 
   warn "Collecting result $result";
 
-  if ($result->isa('TAP::Parser::Result::Plan')) {
-    # Plans?  We don't need no steenkin plans.
-    return;
-  }
+  my $file_thing = $self->{files}{$self->{current_filename}};
 
-  my $my_result;
-  if($result->is_bailout) {
-      $my_result->{explanation} = $result->explanation;
-      $self->{all_ok} = 0;
-  } else {
-      $my_result = {
-                   number => $result->number,
-                   description => $result->description,
-                   directive => $result->directive, # undef, TODO, or SKIP.
-                   explanation => $result->explanation, # if directive is TODO or SKIP, why it was TODONE or SKIPped.
-                   is_ok => $result->is_ok
+  my $my_result = {
+                   as_string => $result->as_string,
+                   type => $result->type,
                   };
+  if ($result->is_plan) {
+    $my_result->{is_ok} = 1;
+    $file_thing->{planned_test_count} = $result->tests_planned;
+  } elsif ($result->is_bailout) {
+    $my_result->{is_ok} = 0;
+  } elsif ($result->is_test) {
+    $my_result = {
+                  number => $result->number,
+                  description => $result->description,
+                  directive => $result->directive, # undef, TODO, or SKIP.
+                  explanation => $result->explanation, # if directive is TODO or SKIP, why it was TODONE or SKIPped.
+                  is_ok => $result->is_ok,
+                  as_string => $result->as_string,
+                 };
+  } elsif ($result->type eq 'unknown') {
+    # Everything useful in here is universal.
+  } elsif ($result->type eq 'comment') {
+    $my_result->{text} = $result->comment;
+  } else {
+    die "don't know how to handle result $result";
   }
 
-  if (!exists $self->{all_ok}) {
-    $self->{all_ok} = 1;
-  }
-  $self->{all_ok} &&= $result->is_ok;
+  $file_thing->{all_ok} &&= $my_result->{is_ok};
+  $self->{all_ok}       &&= $my_result->{is_ok};
 
-  push @{$self->{results}{$self->{current_filename}}{results}}, $my_result;
+  push @{$file_thing->{results_ordered}}, $my_result;
+  $file_thing->{results_named}{$my_result->{description}} = $my_result
+    if $my_result->{description};
 
+  return 1;
 }
 
 sub summary {
