@@ -27,7 +27,9 @@ my $cb = Safe::CodeBuilder->new({
                                 });
 
 $cb->create_environment_directory();
+dies_ok(sub { $cb->compile_project }, 'dies when asked to compile project before project unpacked');
 
+$cb->unpack_project;
 
 ok($cb->compile_project(), 'Compiled project without errors');
 my $ret;

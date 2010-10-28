@@ -43,6 +43,10 @@ sub result {
                    as_string => $result->as_string,
                    type => $result->type,
                   };
+  if (!$result->is_comment) {
+    delete $file_thing->{in_extended_comment};
+  }
+
   if ($result->is_plan) {
     $my_result->{is_ok} = 1;
     $file_thing->{planned_test_count} = $result->tests_planned;
@@ -55,12 +59,31 @@ sub result {
                   directive => $result->directive, # undef, TODO, or SKIP.
                   explanation => $result->explanation, # if directive is TODO or SKIP, why it was TODONE or SKIPped.
                   is_ok => $result->is_ok,
-                  as_string => $result->as_string,
+                  %$my_result
                  };
+    # Test::Builder::ok seems to add a leading '- ' to descriptions, for reasons unknown (to me).
+    $my_result->{description} =~ s/^- //;
   } elsif ($result->type eq 'unknown') {
+    if ($result->as_string eq '') {
+      # Empty unknowns are useless.  Don't litter the output with them.
+      return;
+    }
+    
     # Everything useful in here is universal.
   } elsif ($result->type eq 'comment') {
     $my_result->{text} = $result->comment;
+
+    # *Something* seems to prepend "Failed test '$description'" to extra output for failing tests.
+    # Nigglingly, I can't locate quite where this happens.
+    if ($my_result->{text} =~ m/^Failed test \'(.*)\'$/ and
+        exists $file_thing->{results_named}{$1}) {
+      $file_thing->{in_extended_comment} = $file_thing->{results_named}{$1};
+    }
+
+    # Including the first time!
+    if ($file_thing->{in_extended_comment}) {
+      $file_thing->{in_extended_comment}{extended_comment} .= "$my_result->{text}\n";
+    }
   } else {
     die "don't know how to handle result $result";
   }
