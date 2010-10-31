@@ -17,7 +17,7 @@ sub open_test {
 
   # This is supposed to return a "session", which "result" can then be called on.
   $self->{current_filename} = $filename;
-  $self->{files}{$filename} ||= {};
+  $self->{files}{$filename} ||= {all_ok => 1};
 
   return $self;
 }
@@ -33,7 +33,7 @@ sub close_test {
 sub result {
   my ($self, $result) = @_;
 
-  # result is a TAP::Parser::Result::Test
+  # result is a TAP::Parser::Result::*
 
   warn "Collecting result $result";
 
@@ -48,7 +48,6 @@ sub result {
   }
 
   if ($result->is_plan) {
-    $my_result->{is_ok} = 1;
     $file_thing->{planned_test_count} = $result->tests_planned;
   } elsif ($result->is_bailout) {
     $my_result->{is_ok} = 0;
@@ -88,8 +87,12 @@ sub result {
     die "don't know how to handle result $result";
   }
 
-  $file_thing->{all_ok} &&= $my_result->{is_ok};
-  $self->{all_ok}       &&= $my_result->{is_ok};
+  # comments, etc, are neither OK nor FAIL, this computaion should
+  # ignore them.
+  if (exists $my_result->{is_ok}) {
+      $file_thing->{all_ok} &&= $my_result->{is_ok};
+      $self->{all_ok}       &&= $my_result->{is_ok};
+  }
 
   push @{$file_thing->{results_ordered}}, $my_result;
   $file_thing->{results_named}{$my_result->{description}} = $my_result

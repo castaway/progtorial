@@ -21,7 +21,7 @@ SKIP: {
 
     ## Expected columns:
     foreach my $col (qw/id user_id created_date title post/) {
-        ok($schema->source('Post')->has_column($col), "Found expected Post column $col");
+        ok($schema->source('Post')->has_column($col), "Found expected Post column '$col'");
     }
     is_deeply([$schema->source('Post')->primary_columns()], ['id'], 'Found expected primary key col "id" in Post source');
     

@@ -95,6 +95,7 @@ ok($cb->compile_project(), 'Project still compiles');
 $loadtest = $cb->run_test('t/00-load.t', 't/create-post-class.t');
 print Dumper($loadtest);
 ok($loadtest->{all_ok}, 'PASSED Post tests');
+ok(exists $loadtest->{files}{'t/create-post-class.t'}, 'actually ran multiple test files');
 
 
 

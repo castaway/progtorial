@@ -389,9 +389,9 @@ the primary key of the related class.
 
 Create the Result class for it.
 
-<a name="create_post_class"></a>
+<a name="create-post-class"></a>
 
-[% include_exercise('create_post_class') %]
+[% include_exercise('create-post-class') %]
 
 ### More result classes
 

@@ -4,6 +4,32 @@
 [% exercises.$exercise.form.render %]
 </div>
 <div class="span-9 last">
-  [% USE Dumper; Dumper.dump(results) %]
+ <pre style="display: none">[% USE Dumper; Dumper.dump(results) %]</pre>
+ [% FOREACH filename = results.files.keys %]
+  <div class="testfile testfile_[% results.files.$filename.all_ok ? 'ok' : 'fail' %] [% results.files.$filename.all_ok ? 'success' : 'error' %]">
+   <span class="testfilename">[% filename %]</span>
+    [% FOREACH res = results.files.$filename.results_ordered %]
+     [% NEXT UNLESS res.type == 'test' %]
+     <div class="test [% res.is_ok ? 'success' : 'error' %]" >     
+      <span>[% res.number %] - [% res.description %] [% IF res.extended_comment %] <button class="show_comment">...</button> [% END %]</span>
+      [% IF res.extended_comment %]
+       <p>
+           <pre class="error ext_comment" [% IF shown_fail; 'style="display:none"'; END %]>[% res.extended_comment %]</pre>
+       </p>
+     [% END %]
+     </div>
+     [% IF (!shown_fail and not res.is_ok); shown_fail = 1; END %]
+    [% END %]
+  </div>
+ [% END %]
+
 </div>
 <div style="clear: both"></div>
+
+<script type="text/javascript">
+  jQuery(document).ready( function() {
+    jQuery('.show_comment').click( function() {
+      jQuery(this).next().toggle();
+    });
+  } );
+</script>
