@@ -73,6 +73,17 @@ sub navigation : Private {
              );
 }
 
+## Display markdown "pages" (for now..)
+sub page : Local :Args(1) {
+    my ($self, $c, $page) = @_;
+
+    if($page && $c->config->{pages_path}->file("$page.md")) {
+        $c->stash(page => ''.$c->config->{pages_path}->file("$page.md")->slurp);
+    }
+
+    $c->forward('/navigation');
+}
+
 =head2 end
 
 Attempt to render a view, if needed.

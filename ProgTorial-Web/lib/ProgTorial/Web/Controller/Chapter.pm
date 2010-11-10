@@ -5,9 +5,11 @@ use namespace::autoclean;
 BEGIN {extends 'Catalyst::Controller'; }
 
 use ProgTorial::Form::Exercise;
+## Not just for debugging!
+use Data::Dumper;
 use Config::Any::JSON;
 
-has 'pages_path' => (is => 'rw', isa => 'Path::Class::Dir', required => 1);
+#has 'pages_path' => (is => 'rw', isa => 'Path::Class::Dir', required => 1);
 # has 'env_path' => (is => 'rw', isa => 'Path::Class::Dir', required => 1);
 
 =head1 NAME
@@ -95,7 +97,6 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
         die "Shouldn't be able to get here with no user? (session expired?)";
     }
 
-    ## temp var as Factory creates new each ->model, not per req, should it cache?
     my $cb = $c->model('CodeBuilder');
     if(!$cb->project_unpacked) {
         $cb->unpack_project;
@@ -110,11 +111,20 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
     $cb->compile_project();
     my $results = $cb->run_test('t/00-load.t',
                                 't/' . $exercise . '.t');
+
+    ## Store the results for each attempt:
+    $c->model('Database::Solution')->create({
+        user => $c->user->obj,
+        exercise => $exercise,
+        tutorial => $c->stash->{tutorial},
+        results => Dumper($results),
+                                            });
+        
     $c->stash(results => $results);
     
     $c->log->_dump($results);
-    $c->log->info("Exercise, captures");
-    $c->log->_dump($c->req->captures);
+#    $c->log->info("Exercise, captures");
+#    $c->log->_dump($c->req->captures);
     return $c->visit($self->action_for('chapter_index'), $c->req->captures, []);
 
 }

@@ -46,9 +46,7 @@ __PACKAGE__->config(
     },
     ## should be in conf file.
     'tutorial_path' => ProgTorial::Web->path_to('tutorials'),
-    'Controller::Chapter' => {
-        pages_path => ProgTorial::Web->path_to('pages'),
-    },
+    pages_path => ProgTorial::Web->path_to('pages'),
     projects_path => Path::Class::Dir->new('/usr/src/perl/progtorial/skeletons/'),
     env_path => Path::Class::Dir->new('/tmp/progtorial_env'),
 #    'Controller::User' => { traits => 'Login::OpenID' },

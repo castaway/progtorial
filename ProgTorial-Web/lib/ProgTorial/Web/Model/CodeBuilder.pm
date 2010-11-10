@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Path::Class;
-use base 'Catalyst::Model::Factory';
+use base 'Catalyst::Model::Factory::PerRequest';
 
 __PACKAGE__->config( class => 'Safe::CodeBuilder');
 

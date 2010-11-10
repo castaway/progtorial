@@ -16,7 +16,7 @@ __PACKAGE__->add_columns(
                                       size => 50,
                                      },
                          );
-__PACKAGE__->set_primary_key('exercise');
+__PACKAGE__->set_primary_key('exercise', 'tutorial');
 __PACKAGE__->belongs_to('tutorial', 'ProgTorial::Database::Result::Tutorial');
 
 'done coding';

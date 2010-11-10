@@ -42,6 +42,7 @@ sub tutorial_index: Chained('tutorial_base') :PathPart('') :Args(0) {
     $c->forward('/navigation');
 
     my @tutorials  =  map { 
+        print STDERR "Opening $_\n";
         +{
           capture => $_->dir_list(-1, 1),
           chapters => $self->get_chapters($_),
@@ -89,7 +90,7 @@ sub get_chapters {
     return [ map { 
         my $f = $_->stringify; 
         $f =~ s/\.md/\.cfg/; 
-        Config::Any::JSON->load($f)
+        -e $f ? Config::Any::JSON->load($f) : ()
       } @chapters ];
 }
 
