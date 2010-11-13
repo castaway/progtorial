@@ -6,3 +6,6 @@
  <div class="field">Username: [% c.user.username %]</div>
  <div class="field">Email: [% c.user.email %]</div>
 </div>
+
+[% INCLUDE user/status_updates.tt %]
+

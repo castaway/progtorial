@@ -1,1 +1,4 @@
 <a href="[% c.uri_for('/users/login') %]">Login | Register</a>
+
+<h2>Latest activity</h2>
+[% INCLUDE user/status_updates.tt %]

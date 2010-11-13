@@ -118,6 +118,7 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
         exercise => $exercise,
         tutorial => $c->stash->{tutorial},
         results => Dumper($results),
+        status => ($results->{all_ok} ? 'PASS' : 'FAIL'),
                                             });
         
     $c->stash(results => $results);

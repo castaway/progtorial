@@ -39,7 +39,7 @@ sub view_profile :Chained('required') :PathPart('profile') :Args(1) {
     if($user eq $c->user->username) {
         $c->go('view_own_profile');
     } else {
-        $c->forward('view_foreign_profile', $user);
+        $c->forward('view_foreign_profile', [$user]);
     }
 }
 
@@ -48,6 +48,52 @@ sub view_own_profile :Private {
 
     ## Nothing yet?
     ## Pull current tutorials/exercises/completed exercises from DB etc.
+
+    $c->forward('get_status_updates', [$c->user->obj]);
+}
+
+sub view_foreign_profile :Private {
+    my ($self, $c, $username) = @_;
+
+    ## Nothing yet?
+    ## Pull current tutorials/exercises/completed exercises from DB etc.
+
+    $c->forward('get_status_updates', [$c->model('Database::User')->find({ username => $username })]);
+}
+
+## Get latest bookmarks/pages read/exercises attempted
+## For all users, or just given one.
+sub get_status_updates : Private {
+    my ($self, $c, $user) = @_;
+
+    my $bookmarks = $c->model('Database::Bookmark')->search({
+        ( $user ? (user_id => $user->id) : () )
+       },
+       {
+           select => [ 'user_id', 'occurred_on', \"'bookmarked ' || chapter || ' in ' || tutorial AS status " ],
+           as     => [ 'user_id', 'occurred_on', 'status'],
+       });
+
+    my $exercises = $c->model('Database::Solution')->search({
+        ( $user ? (user_id => $user->id) : () )
+       },
+       {
+           select => [ 'user_id', 'occurred_on', \"'attempted ' || exercise || ' in ' || tutorial || ', and collected a ' || status || ' result' AS status" ],
+           as     => [ 'user_id', 'occurred_on', 'status'],
+       });
+    
+
+    $bookmarks->result_class('ProgTorial::Database::Result::Status');
+    $exercises->result_class('ProgTorial::Database::Result::Status');
+    my $updates = $bookmarks->union($exercises)->search({},
+                                         {
+                                             prefetch => ['user'],
+                                             order_by => ['occurred_on desc'],
+                                             rows => 10,
+                                         });
+
+    $c->stash(status_updates => $updates);
+
 }
 
 ## Used by Catalyst::ActionRole::NeedsLogin

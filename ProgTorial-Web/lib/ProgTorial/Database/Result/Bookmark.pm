@@ -5,11 +5,16 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components('TimeStamp');
 __PACKAGE__->table('bookmarks');
 __PACKAGE__->add_columns(
                          user_id => {
                                      data_type => 'integer',
                                      },
+                         occurred_on => {
+                             data_type => 'datetuime',
+                             set_on_create => 1,
+                         },
                          tutorial => {
                                       data_type => 'varchar',
                                       size => 50,

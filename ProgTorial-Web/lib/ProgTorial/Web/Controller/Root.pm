@@ -32,6 +32,7 @@ sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
 
     $c->forward('/navigation');
+    $c->forward($c->controller('User')->action_for('get_status_updates'));
     $c->log->_dump($c->session);
 }
 
@@ -54,7 +55,7 @@ sub navigation : Private {
     my $nav = [];
     if ($c->user_exists) {
         push @$nav, { url => $c->uri_for('/logout'), name => 'Logout' };
-        push @$nav, { url => $c->uri_for($c->controller('User')->action_for('view_profile'), [ $c->user->username ]), name => 'Your page'};
+        push @$nav, { url => $c->uri_for($c->controller('User')->action_for('view_profile'), $c->user->username), name => 'Your page'};
 
         for my $bookmark ($c->user->obj->bookmarks) {
             # FIXME: Let these be styled?

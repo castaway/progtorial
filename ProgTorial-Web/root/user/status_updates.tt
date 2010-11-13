@@ -1,0 +1,8 @@
+<div class="updates">
+  <ol>
+  [% WHILE (row = status_updates.next) %]
+    <li>[% row.user.username %] [% row.get_column('status') %] on [% row.occurred_on %]</li>
+  [% END %]
+  </ol>
+</div>
+

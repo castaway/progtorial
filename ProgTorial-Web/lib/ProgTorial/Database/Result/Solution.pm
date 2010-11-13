@@ -5,12 +5,16 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components('Ordered');
+__PACKAGE__->load_components('TimeStamp', 'Ordered');
 __PACKAGE__->table('solutions');
 __PACKAGE__->add_columns(
                          user_id => {
                                      data_type => 'integer',
                                      },
+                         occurred_on => {
+                             data_type => 'datetime',
+                             set_on_create => 1,
+                         },
                          tutorial => {
                                       data_type => 'varchar',
                                       size => 50,
@@ -27,6 +31,10 @@ __PACKAGE__->add_columns(
                          results => {
                              data_type => 'varchar',
                              size => 2048,
+                         },
+                         status => {
+                             data_type => 'varchar',
+                             size => 15,
                          },
                          );
 __PACKAGE__->set_primary_key('user_id', 'tutorial', 'exercise', 'attempt');

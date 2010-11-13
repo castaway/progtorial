@@ -1,6 +1,6 @@
 -- 
 -- Created by SQL::Translator::Producer::PostgreSQL
--- Created on Wed Nov 10 21:05:42 2010
+-- Created on Fri Nov 12 23:14:04 2010
 -- 
 --
 -- Table: tutorials
@@ -41,6 +41,7 @@ CREATE INDEX "exercises_idx_tutorial" on "exercises" ("tutorial");
 DROP TABLE "bookmarks" CASCADE;
 CREATE TABLE "bookmarks" (
   "user_id" integer NOT NULL,
+  "occurred_on" datetuime NOT NULL,
   "tutorial" character varying(50) NOT NULL,
   "chapter" character varying(50) NOT NULL,
   "exercise" character varying(50) NOT NULL,
@@ -56,10 +57,12 @@ CREATE INDEX "bookmarks_idx_user_id" on "bookmarks" ("user_id");
 DROP TABLE "solutions" CASCADE;
 CREATE TABLE "solutions" (
   "user_id" integer NOT NULL,
+  "occurred_on" timestamp NOT NULL,
   "tutorial" character varying(50) NOT NULL,
   "exercise" character varying(50) NOT NULL,
   "attempt" integer NOT NULL,
   "results" character varying(2048) NOT NULL,
+  "status" character varying(15) NOT NULL,
   PRIMARY KEY ("user_id", "tutorial", "exercise", "attempt")
 );
 CREATE INDEX "solutions_idx_exercise_exercise" on "solutions" ("exercise");

@@ -1,6 +1,6 @@
 -- 
 -- Created by SQL::Translator::Producer::MySQL
--- Created on Wed Nov 10 21:05:42 2010
+-- Created on Fri Nov 12 23:14:04 2010
 -- 
 SET foreign_key_checks=0;
 
@@ -48,6 +48,7 @@ DROP TABLE IF EXISTS `bookmarks`;
 --
 CREATE TABLE `bookmarks` (
   `user_id` integer NOT NULL,
+  `occurred_on` datetuime NOT NULL,
   `tutorial` varchar(50) NOT NULL,
   `chapter` varchar(50) NOT NULL,
   `exercise` varchar(50) NOT NULL,
@@ -67,10 +68,12 @@ DROP TABLE IF EXISTS `solutions`;
 --
 CREATE TABLE `solutions` (
   `user_id` integer NOT NULL,
+  `occurred_on` datetime NOT NULL,
   `tutorial` varchar(50) NOT NULL,
   `exercise` varchar(50) NOT NULL,
   `attempt` integer NOT NULL,
   `results` text NOT NULL,
+  `status` varchar(15) NOT NULL,
   INDEX `solutions_idx_exercise_exercise` (`exercise`),
   INDEX `solutions_idx_tutorial` (`tutorial`),
   INDEX `solutions_idx_user_id` (`user_id`),
