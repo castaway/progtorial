@@ -1,0 +1,9 @@
+<h2>[% user.username %]</h2>
+
+<div class="user_data">
+ <div class="field">Username: [% user.username %]</div>
+ <div class="field">Email: [% user.email %]</div>
+</div>
+
+[% INCLUDE user/status_updates.tt %]
+

@@ -63,8 +63,9 @@ __PACKAGE__->add_columns(
 );
 __PACKAGE__->set_primary_key("id");
 
-__PACKAGE__->has_many('bookmarks', ProgTorial::Database::Result::Bookmark::, 'user_id');
+__PACKAGE__->has_many('bookmarks', 'ProgTorial::Database::Result::Bookmark', 'user_id');
 
 __PACKAGE__->has_many('solutions', 'ProgTorial::Database::Result::Solution', 'user_id');
+__PACKAGE__->has_many('settings', 'ProgTorial::Database::Result::UserSettings', 'user_id');
 
 'done_coding';

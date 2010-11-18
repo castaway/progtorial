@@ -4,9 +4,8 @@ use namespace::autoclean;
 
 BEGIN {extends 'CatalystX::SimpleLogin::Controller::Login'; }
 
-## Ideally this should eventually be both login+register, 
-## see amazon + qype for inspiration
 use ProgTorial::Form::Register;
+use ProgTorial::Form::Profile;
 
 =head1 NAME
 
@@ -33,10 +32,10 @@ sub index :Path :Args(0) {
 sub user_base :Chained('not_required') :PathPart('users') :CaptureArgs(0) {
 }
 
-sub view_profile :Chained('required') :PathPart('profile') :Args(1) {
+sub view_profile :Chained('user_base') :PathPart('profile') :Args(1) {
     my ($self, $c, $user) = @_;
 
-    if($user eq $c->user->username) {
+    if($c->user_exists && $user eq $c->user->username) {
         $c->go('view_own_profile');
     } else {
         $c->forward('view_foreign_profile', [$user]);
@@ -58,8 +57,50 @@ sub view_foreign_profile :Private {
     ## Nothing yet?
     ## Pull current tutorials/exercises/completed exercises from DB etc.
 
-    $c->forward('get_status_updates', [$c->model('Database::User')->find({ username => $username })]);
+    my $user = $c->model('Database::User')->find({ username => $username });
+    die "No such user $username" if(!$user);
+
+    $c->forward('get_status_updates', [$user]);
+    $c->stash(user => $user);
 }
+
+sub edit_profile :Chained('user_base') :PathPart('edit_profile') {
+    my ($self, $c) = @_;
+
+    ## Should probably ::Form::User::Profile
+    my $form = ProgTorial::Form::Profile->new();
+
+    foreach my $col (qw/username email/) {
+        $form->field($col)->value($c->user->obj->$col);
+    }
+    if($c->req->param()) {
+        $form->process(ctx => $c, params => $c->req->params, verbose => 1 );
+        if($form->validated) {
+            $c->log->info('Updating user account');
+
+            ## How to return/set form to error state if update fails?
+            my %values = map { exists $c->req->params->{$_} 
+                               ? ($_ => $c->req->param($_)) 
+                                   : ()} qw/password email/;
+            $c->user->obj->update(\%values);
+
+            ## Privacy settings
+            $c->user->obj->settings->delete;
+            foreach my $setting(qw/show_bookmarks show_exercises/) {
+                $c->user->obj->settings->create({ 
+                    setting => {
+                        name => $setting,
+                    },
+                    value => 1,
+                                                })
+            }
+            
+        }
+    }
+
+    $c->stash(form => $form);
+}
+
 
 ## Get latest bookmarks/pages read/exercises attempted
 ## For all users, or just given one.
@@ -109,7 +150,7 @@ sub register_or_login :Chained('user_base') :PathPart('login') :Args(0) {
 
     my $form = ProgTorial::Form::Register->new();
     if($c->req->param()) {
-        $form->process(ctx => $c, params => $c->req->params, verbose => 1 );
+        $form->process(ctx => $c, params => $c->req->params, verbose =>  0);
         ## Register, else authenticated by validate()
         if($form->validated) {
             $c->log->info('Validated register');

@@ -1,5 +1,5 @@
 * Decisions
-** TODO Path to user environment .. username/XX?
+** DONE Path to user environment .. username/XX?
 ** TODO User Auth, OpenID?
 ** TODO Tutorial content
 ** DONE layout of "system" skeletons/ = tarballs & content for base tutorial
@@ -7,11 +7,14 @@
  solution needed up until this chapter to solve
  the current test, minus whatever the test is testing. overlay this onto the user's lib dir
  if requested, or they haven't done previous codings.
-** TODO How to keep track which items the user has done?
+** DONE How to keep track which items the user has done?
+  Individual items done, so far, bookmarks and exercise results can be used as "latest activities" 
 ** TODO Docs in module code, do we set AUTHOR / etc for the user?
  
 *** TODO Ch1 - setup of dbic schema files
-** TODO When to create the user's coding environment?
+** DONE When to create the user's coding environment?
+  on login and/or register, with checkbox
+  needs more explainng of what it is, and that it will take a while.  
 ** TODO How to set/change perms on the coding env (to 'progtorial')
 ** TODO Need sudo to run mknod!
 * Setup
@@ -29,17 +32,22 @@
     CLOCK: [2010-09-18 Sat 17:43]--[2010-09-18 Sat 19:09] =>  1:26
 *** DONE Set up authentication (CatalystX::Login?)
     CLOCK: [2010-09-18 Sat 21:06]--[2010-09-18 Sat 23:00] =>  1:54
-** TODO Compiling / testing user code
+** DONE Compiling / testing user code
 *** DONE Figure out how to run all these chrooted
-*** TODO Compile user code, report results
-*** TODO Run user code against applicable test suite / file, report results
-*** TODO Output test cover results to somewhere the application can display them
+*** DONE Compile user code, report results
+*** DONE Run user code against applicable test suite / file, report results
+*** DONE Output test cover results to somewhere the application can display them
 ** TODO User profile maint/management
 *** TODO Password reminder/reset
 *** TODO Change my password
 *** TODO Edit account details/email etc
 *** TODO View my exercises/tutorials/tarballs
 *** TODO Download my tarballs
+*** TODO Privacy settings show/don't show (default not?) my recent attempts/exercises/bookmarks in the activity list
+  Goes for both main page and when other user view's my home page
+  Will always show for user themselves
+  On main page, show "N other updates" for the hidden ones, and add a link "Why don't I see my updates here?"
+    for confused users who haven't enabled priv settings 
 ** TODO User settings
 *** TODO User bookmarks, store per tutorial - user has_many bookmarks (tutorial/exercise)
 *** TODO Automatic bookmarking, on/off
