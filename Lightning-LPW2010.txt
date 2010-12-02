@@ -1,0 +1,17 @@
+
+How to learn / try out a module without the frustrating/faffing of installing it?
+
+Let someone else install it. 
+
+Try it online. Actual interactive coding.
+
+Read about the module, try the exercises.
+
+PASS or FAIL the exercise, yes its just a perl unit test file!
+
+Obligatory social media add-ons, friending, openid, comments etc.
+
+Help needed! Github! http://github.com/castaway/progtorial
+
+
+
