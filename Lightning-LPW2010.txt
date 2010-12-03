@@ -1,4 +1,35 @@
 
+So there's a DBIx::Class tutorial on CPAN, wihcih I initally wrote
+because I was supposed to tell my coworkers how to use dbix-class,
+which seemed to go down rather well.
+And it's also checked into the repository in svn (I think).
+And I started writing version 2, and there's quite a lot of it there,
+with an actual real-world aplication type piece, instead of just
+random examples.
+But I never got around to finishing it, and people are actually using
+it, even though it'sgot big holes in it.
+But a lot of the rpoblems, or a east some of the rpobelms people are
+having, are actually getting started (dispite having read tutorialss),
+and isntalling lots of stuff.
+
+Also, perl documentation is very flat (reference-oriented?).  It puts
+a lot of explanations on the user to already know hw to install a
+module, write perl, etc.
+
+So I decided we have this thing called the internet, and called web
+applications, so I decided that there was a better method of teaching
+people, closer to how I would do it if they came to me on IRC (which
+people do all the time), which is to help people work though a set of
+problems until they work out how they can do what they wanted to
+achive.  It would be much more useufl if tutorials could do this as
+well.
+
+And since I know how to use catalyst...
+
+
+
+---
+
 How to learn / try out a module without the frustrating/faffing of installing it?
 
 Let someone else install it. 
