@@ -57,7 +57,7 @@ sub create_environment_directory {
   my ($self) = @_;
 
   my $dest = $self->environment_directory;
-  return 1 if(-d $dest);
+  return -1 if(-d $dest);
   $dest->mkpath;
   
   for my $thingy ('/dev/null',
@@ -97,6 +97,7 @@ sub create_environment_directory {
                             $self->pm_file('Safe::TAPFormatter'), 
                             $self->class_to_file('Safe::TAPFormatter') );
 
+  return 1;
 }
 
 sub run_in_child {

@@ -4,7 +4,8 @@
 [% exercises.$exercise.form.render %]
 </div>
 <div class="span-9 last">
- <pre style="display: none">[% USE Dumper; Dumper.dump(results) %]</pre>
+ [%# Turning this Dumper line on makes things go 20x slower! %]
+ <pre style="display: none">[%# USE Dumper; Dumper.dump(results) %]</pre>
  [% FOREACH filename = results.files.keys %]
   <div class="testfile testfile_[% results.files.$filename.all_ok ? 'ok' : 'fail' %] [% results.files.$filename.all_ok ? 'success' : 'error' %]">
    <span class="testfilename">[% filename %]</span>

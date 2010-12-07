@@ -109,7 +109,7 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
                               content => $c->req->param('answer')
                                 });
     $cb->compile_project();
-    my $results = $cb->run_test('t/00-load.t',
+    my $results = $cb->run_test( #'t/00-load.t',
                                 't/' . $exercise . '.t');
 
     ## Store the results for each attempt:
