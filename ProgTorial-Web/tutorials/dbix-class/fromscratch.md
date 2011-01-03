@@ -25,8 +25,8 @@ these files by hand following this chapter. You can also use
 documentation of that manual, or look in
 [Appendix2](http://search.cpan.org/perldoc?DBIx::Class::Tutorial::Appendix2) on how to do that.
 
-Class files needed
-------------------
+Perl classes you need to create
+-------------------------------
 
 To access your database in your Perl code uing DBIx::Class you need to
 create a set of Perl classes that define the layout of your database
@@ -49,22 +49,22 @@ on sets of data. More about those later on.
 
 <a name="#a-word-about-namespaces"></a>
 
-A word about namespaces
------------------------
+A word about module namespaces
+------------------------------
 
 Current best practice suggests that you name your DBIx::Class files in
 the following way:
 
     ## The Schema class
-    <Databasename|appname>::Schema
+    <Databasename|Appname>::Schema
 
     ## The result classes
-    <Databasename|appname>::Schema::Result::<tablename>
+    <Databasename|Appname>::Schema::Result::<tablename>
 
     ## The resultset classes
-    <Databasename|appname>::Schema::ResultSet::<tablename>
+    <Databasename|Appname>::Schema::ResultSet::<tablename>
 
-Here, __Databasename|appname__ refers to the top-level namespace for
+Here, __Databasename|Appname__ refers to the top-level namespace for
 your application. If the set of modules are to be used as a standalone
 re-usable set for just this database, use the name of the database or
 something that identifies it. If your modules are part of an entire
@@ -78,8 +78,6 @@ application, then the application top-level namespace may go here.
 While the table names in the database are often named using a plural,
 eg _users_, the corresponding Result class is usually named in the
 singular, as it respresents a single result, or row of the query.
-
-[%# Exercise, create empty result class packages for each of the tables named in the introduction %]
 
 The Schema class
 ----------------
@@ -154,7 +152,7 @@ Our user table looks like this (in mysql):
       email VARCHAR (255)
     );
 
-First we setup a result class for use.
+This is the result class for the users table:
 
     1. package MyBlog::Schema::Result::User;
     2. use strict;
@@ -186,6 +184,7 @@ in [perldata](http://search.cpan.org/perldoc?perldata).
 
 Then we get to the DBIx::Class specific bits:
 
+[%#
 `load_components` comes from [DBIx::Class::Componentised](http://search.cpan.org/perldoc?DBIx::Class::Componentised) and is
 used to load a series of modules whose methods can delegate to each
 other. Thus components need to be loaded in a specific order. The
@@ -194,14 +193,17 @@ its methods are called after those of other components.
 
 For a some examples of other useful components, see
 L<DBIx::Class::Tutorial::??>.
+%]
 
 - Line 6
 
-`table` is used to set the name of the database table this class is
+The `table` method is used to set the name of the database table this class is
 using. It is a method in [DBIx::Class::ResultSourceProxy::Table](http://search.cpan.org/perldoc?DBIx::Class::ResultSourceProxy::Table) which is 
 loaded as a component by [DBIx::Class::Core](http://search.cpan.org/perldoc?DBIx::Class::Core). 
 
+[%#
 That's a long way of saying: You must call it __after__ `load_components`.
+%]
 
 Calling the `table` method sets up the [DBIx::Class::ResultSource](http://search.cpan.org/perldoc?DBIx::Class::ResultSource)
 instance ready for adding columns to, so this method must also be
@@ -245,10 +247,10 @@ Now you can add lines describing the columns in your table.
 - Line 8
 
 `add_columns` is called to define all the columns in your table that
-you wish to tell DBIx::Class about (you may leave out some of the
-table's columns if you wish). 
+you wish to tell DBIx::Class about, you may leave out some of the
+table's columns if you wish. 
 
-`add_columns` can provide as much or little description of the
+The `add_columns` call can provide as much or little description of the
 columns as it likes, in its simplest form, it can contain just a list
 of column names:
 
@@ -398,6 +400,8 @@ searches as methods to a set of data, to keep them in the model layer
 rather than in the calling code. One ResultSet class can be created
 for each Result class in the Schema.
 
+We will visit examples of these later.
+
 ## Making a database
 
 If you're starting from scratch and don't actually have a database
@@ -418,12 +422,6 @@ CONCLUSIONS
 
 You now have a couple of well-defined Result classes we can use to
 actually create and query some data from your database.
-
-EXERCISES (recap)
----------------
-
-Terms (recap)
--------------
 
 Next Chapter
 ------------

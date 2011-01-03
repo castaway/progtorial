@@ -54,11 +54,15 @@ sub navigation : Private {
 
     my $nav = [];
     if ($c->user_exists) {
+        $c->log->_dump($c->user->obj);
+        $c->log->debug("User: " . $c->user->username);
         push @$nav, { url => $c->uri_for('/logout'), name => 'Logout' };
         push @$nav, { url => $c->uri_for($c->controller('User')->action_for('view_profile'), $c->user->username), name => 'Your page'};
 
+        push @$nav, { name => 'Your Bookmarks'};
         for my $bookmark ($c->user->obj->bookmarks) {
             # FIXME: Let these be styled?
+            print STDERR "Bookmark $bookmark\n";
             my $url = $c->uri_for($c->controller('Chapter')->action_for('chapter_index'), [ $bookmark->tutorial->tutorial, $bookmark->chapter ]);
             my $name = $bookmark->tutorial->tutorial . ' - ' .$bookmark->chapter;
             push @$nav, { url => $url, name => $name };
@@ -67,6 +71,7 @@ sub navigation : Private {
         push @$nav, { url => $c->uri_for('/users/login'), name => 'Login' };
     }
 
+    push @$nav, { name => 'All Tutorials' };
     push @$nav, { url => $c->uri_for('/tutorials'), name => 'Tutorials' };
 
     $c->stash(navigation => $nav,

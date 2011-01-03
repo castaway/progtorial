@@ -1,6 +1,10 @@
 
 <ul>
   [% FOREACH nav = navigation %]
-    <li><a href="[% nav.url %]" [% IF nav.url == current_page %] class="current"[% END %]>[% nav.name %]</a></li>
+    [% IF nav.url %]
+      <li><a href="[% nav.url %]" [% IF nav.url == current_page %] class="current"[% END %]>[% nav.name %]</a></li>
+    [% ELSE %]
+      <li><strong>[% nav.name %]</strong></li>
+    [% END %]
   [% END %]
 </ul>

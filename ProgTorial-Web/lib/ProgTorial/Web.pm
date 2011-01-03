@@ -73,10 +73,15 @@ __PACKAGE__->config(
             },
             openid => {
                 credential => {
+                    debug => 1,
                     class => 'OpenID',
-                    ua_class => 'LWP::UserAgent',
+#                    errors_are_fatal => 1,
+## using LWP::ParanoidAgent (default)                    
+#                    ua_class => 'LWP::UserAgent',
                 },
+                ## openid credential cant use dbic store..
                 store => {
+#                    class => 'OpenID',
                     class => 'DBIx::Class',
                     user_model => 'DataBase::User',
                     use_userdata_from_session => 0,

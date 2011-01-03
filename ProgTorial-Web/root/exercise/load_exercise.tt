@@ -3,12 +3,20 @@
 <div class="span-9">
 [% exercises.$exercise.form.render %]
 </div>
-<div class="span-9 last">
+<div id="[% $exercise %]" class="span-9 last">
+
+ <div class="show-tests">
+  <pre><code>[% exercises.$exercise.tests %]</code></pre>
+ </div>
+
+ <div class="show-results">
  [%# Turning this Dumper line on makes things go 20x slower! %]
  <pre style="display: none">[%# USE Dumper; Dumper.dump(results) %]</pre>
+
  [% FOREACH filename = results.files.keys %]
   <div class="testfile testfile_[% results.files.$filename.all_ok ? 'ok' : 'fail' %] [% results.files.$filename.all_ok ? 'success' : 'error' %]">
    <span class="testfilename">[% filename %]</span>
+
     [% FOREACH res = results.files.$filename.results_ordered %]
      [% NEXT UNLESS res.type == 'test' %]
      <div class="test [% res.is_ok ? 'success' : 'error' %]" >     
@@ -21,14 +29,18 @@
      </div>
      [% IF (!shown_fail and not res.is_ok); shown_fail = 1; END %]
     [% END %]
+
   </div>
  [% END %]
-
+ </div>
 </div>
 <div style="clear: both"></div>
 
 <script type="text/javascript">
   jQuery(document).ready( function() {
+    // Default, hide tests
+    jQuery('.show-tests').hide();
+
     jQuery('.show_comment').click( function() {
       jQuery(this).next().toggle();
     });

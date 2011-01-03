@@ -62,6 +62,7 @@ sub chapter :Chained('base') :PathPart(''): CaptureArgs(1) {
     $c->stash(config => $config);
     $c->stash(chapter => $config->{chapter});
     $c->stash->{exercises} ||= $self->load_exercises($c, $config, $chapter);
+    $self->load_tests($config, $c->stash->{exercises});
 
     if($c->session_expires(1)) {
         ## Store current project associated with this chapter, to send to
@@ -94,6 +95,8 @@ sub exercise :Chained('chapter') :PathPart('exercise') :Args(0) {
     }
 
     if(!$c->user_exists) {
+        ## go back to chapter page
+        return $c->visit($self->action_for('chapter_index'), $c->req->captures, []);
         die "Shouldn't be able to get here with no user? (session expired?)";
     }
 
@@ -216,6 +219,13 @@ sub load_exercises {
             }
             @{ $config->{exercises} } 
     };
+}
+
+sub load_tests {
+    my ($self, $config, $exercises) = @_;
+
+    ## somehow in here, load the test contents into $exercises->{$exercise}{tests};
+    ## Get them from codebuilder?
 }
 
 =head1 AUTHOR

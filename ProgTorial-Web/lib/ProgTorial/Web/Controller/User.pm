@@ -150,13 +150,52 @@ sub register_or_login :Chained('user_base') :PathPart('login') :Args(0) {
 
     my $form = ProgTorial::Form::Register->new();
     if($c->req->param()) {
-        $form->process(ctx => $c, params => $c->req->params, verbose =>  0);
-        ## Register, else authenticated by validate()
+        ## Annoying OpenID loop, to do something with the results of the
+        ## OpenID check.. it doesn't seem possible to have this "return_to"
+        ## a different action #FIXME
+        if(exists $c->req->params->{'openid-check'}) {
+            ## Creating user for openid login
+            my $oid = $c->model('Database::OpenID')->find_or_create({ url => $c->req->params->{'openid.identity'} });
+            die "Can't create openid user!" . $c->req->params->{'openid.identity'} if(!$oid);
+            my $username = $c->req->params->{'openid.identity'};
+            $username =~ s{\W}{}g;
+            my $u = $oid->get_column('user_id') 
+                ? $oid->user
+                : $oid->create_related('user', { username => $username,
+                                                 displayname => $c->req->params->{'openid.identity'},
+                                         });
+            $oid->user($u);
+            $oid->update();
+            ## Set correct db user as logged in user.
+            $c->log->debug("Logging in as: ". $u->id);
+            $c->authenticate({
+                ## Why don't the searchargs go in the config?
+                'dbix_class' => {
+                    searchargs => [
+                        {
+                            'openid.url' => $c->req->params->{'openid.identity'}
+                        },
+                        {
+                            join => 'openid',
+                        }
+                        ]
+                },
+                             }, 'openid');
+
+#            $c->authenticate({ id => $u->id }, 'default');
+            return $c->res->redirect($c->uri_for($self->action_for('edit_profile')));
+            
+        } else {
+            ## ::Register::validate does the "authenticate()" call during this:
+            $form->process(ctx => $c, params => $c->req->params, verbose =>  0);
+        }
+
         if($form->validated) {
-            $c->log->info('Validated register');
+            $c->log->info('Validated login_or_register');
             ## Move all this into the form so that if user create fails
-            ## validate fails and user can retry
-            if($form->field('is_register')->value) {
+            ## validate fails and user can retry?
+            if($form->field('is_register')->value 
+               && !exists $c->req->params->{'openid-check'}) {
                 $c->log->info('is Register = true');
                 my $user_rs = $c->model('Database::User');
                 my $newuser = $user_rs->create( { 
@@ -165,19 +204,20 @@ sub register_or_login :Chained('user_base') :PathPart('login') :Args(0) {
                     displayname => $c->req->param('username')
                                                 });
                 if($newuser) {
+                    # login newly created user:
                     $c->authenticate({ username => $c->req->param('username'),
                                        password => $c->req->param('password') });
                 } else {
                     die "Failed to create user";
                 }
-                ## Where should this go?
-                if($c->user_exists && $c->req->param('do_createenv')) {
-                    ## No "current project" here? S::CB needs to not care..
-                    $c->model('CodeBuilder')->create_environment_directory();
-                }
                 # $c->res->redirect($c->uri_for('/'));
             } else {
                 ## Has logged in:
+            }
+
+            ## Create user's coding environment, if they ask for it
+            if($c->user_exists && $c->req->param('do_createenv')) {
+                ## No "current project" here? S::CB needs to not care..
                 my $cb = $c->model('CodeBuilder');
                 ## 1 = created, -1 == already existed
                 if($cb->create_environment_directory() > 0) {
@@ -190,6 +230,7 @@ sub register_or_login :Chained('user_base') :PathPart('login') :Args(0) {
                     }
                 }
             }
+
             $c->session->{redirect_to_after_login} ||= $c->uri_for('/');
             $c->res->redirect($c->session->{redirect_to_after_login});
             $c->extend_session_expires(999999999999)

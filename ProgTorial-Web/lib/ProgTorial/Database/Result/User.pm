@@ -55,7 +55,7 @@ __PACKAGE__->add_columns(
   "username",
   { data_type => "varchar", is_nullable => 0, size => 50 },
   "password",
-  { data_type => "varchar", is_nullable => 0, size => 50 },
+    { data_type => "varchar", is_nullable => 1, size => 50 },
   "displayname",
   { data_type => "varchar", is_nullable => 0, size => 25 },
   "email",
@@ -67,5 +67,6 @@ __PACKAGE__->has_many('bookmarks', 'ProgTorial::Database::Result::Bookmark', 'us
 
 __PACKAGE__->has_many('solutions', 'ProgTorial::Database::Result::Solution', 'user_id');
 __PACKAGE__->has_many('settings', 'ProgTorial::Database::Result::UserSettings', 'user_id');
+__PACKAGE__->might_have('openid', 'ProgTorial::Database::Result::OpenID', 'user_id');
 
 'done_coding';

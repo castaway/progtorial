@@ -7,6 +7,7 @@
   jQuery('.register_field').hide();
 
   register_callback('.register_switch :checkbox');
+  openid_callback('.openid_switch :checkbox');
 
   function register_callback(chbox) {
     if(jQuery(chbox).attr('checked')) {
@@ -22,6 +23,17 @@
     }
   }
 
+  function openid_callback(chbox) {
+    if(jQuery(chbox).attr('checked')) {
+        jQuery('.local_login_field').hide();
+        return true;
+    } else {
+       jQuery('.local_login_field').show();
+       return true;
+    }
+  }
+
   jQuery('.register_switch :checkbox').change( function() { register_callback(this) } );
+  jQuery('.openid_switch :checkbox').change( function() { openid_callback(this) } );
 
 </script>
