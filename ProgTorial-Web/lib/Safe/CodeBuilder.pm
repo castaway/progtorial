@@ -18,6 +18,7 @@ has 'debug',            is => 'rw', default => 0;
 has 'max_memory',     is => 'rw', default => 20*1024*1024;
 # Maximum amount of disk space that the entire environment can use, in bytes.  (Note that the actual limit will be rounded down to the nearest 1024-byte increment.)
 has 'max_disk_space', is => 'rw', default => 100_000;
+has 'max_run_seconds', is => 'rw', default => 20;
 
 sub environment_directory {
   my ($self) = @_;
@@ -125,8 +126,20 @@ sub run_in_child {
 
   my $full_cmd = qq<sudo chroot --userspec 10005:10012 "$envdir" sh -c '$cmd'>;
   print STDERR "running $full_cmd\n";
-  $| = 1;
-  my $ret =`$full_cmd 2>&1`;
+  my $ret;
+  {
+    local $| = 1;
+    local $SIG{ALRM} = sub {
+      alarm(0); # Probably redundant?
+      die "Time limit exceeded";
+    };
+    alarm($self->max_run_seconds);
+    # I am honestly somewhat confused by the eval-die talk in perlfunc alarm.
+    # I think it doesn't apply on linux?
+    # If this is neccessary, the test will fail.  People running security-sensitive code without running the tests deserve to keep both pieces.
+    $ret =`$full_cmd 2>&1`;
+    alarm(0);
+  }
   {
     my $debug_ret = $ret;
     $debug_ret =~ s/^/child: /mg;
@@ -134,6 +147,18 @@ sub run_in_child {
   }
   return $ret;
 }
+
+=head2 compile_project
+
+=over
+
+=item Arguments: None
+
+=item Return value: Unspecified
+
+=back
+
+=cut
 
 sub compile_project {
   my ($self) = @_;

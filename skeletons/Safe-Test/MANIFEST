@@ -4,3 +4,4 @@ t/bail.t
 t/not_ok.t
 t/ok.t
 t/2ok.t
+t/too_long.t

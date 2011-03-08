@@ -23,15 +23,31 @@ my $cb = Safe::CodeBuilder->new({
                                  max_memory => 20_000,
                                  ## Max diskspace entire env can use
                                  max_disk_space => 100_000,
+                                 ## Max time code can run
+                                 max_run_seconds => 20,
 
                                 });
 
 $cb->create_environment_directory();
 dies_ok(sub { $cb->compile_project }, 'dies when asked to compile project before project unpacked');
 
+# TODO.
+if (0) {
+  dies_ok(sub {$cb->run_in_child('thisdoesnotexist')});
+}
+
+$cb->max_run_seconds(2);
+throws_ok(sub {
+              $cb->run_in_child('perl -e"sleep 5"');
+          },
+          qr/time limit exceeded/i,
+          'overly long run_in_child'
+         );
+$cb->max_run_seconds(20);
+
 $cb->unpack_project;
 
-ok($cb->compile_project(), 'Compiled project without errors');
+lives_ok(sub { $cb->compile_project() }, 'Compiled project without errors');
 my $ret;
 $ret = $cb->run_test('t/2ok.t');
 ok(1, 'Survived an OK test');
@@ -44,6 +60,12 @@ diag(Dumper(['not_ok test', $ret]));
 $ret = $cb->run_test('t/bail.t');
 ok(1, 'Survived a bail test');
 diag(Dumper(['bail test', $ret]));
+
+$ret = $cb->run_test('t/too_long.t');
+ok(1, 'Survived a too long test');
+diag(Dumper(['too long test', $ret]));
+
+
 
 #dies_ok(sub { $cb->update_or_add_file({
 #    filename => 'BIGFILETEST.txt',
